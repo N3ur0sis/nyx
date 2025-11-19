@@ -98,40 +98,40 @@ Nyx follows a layered architecture designed for maintainability, security, and e
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    Application Layer                          │
-│  ┌───────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │ Tool CLIs     │  │ Web Dashboard│  │  Script Interface│  │
-│  │ (ph_*, ae_*)  │  │   (Future)   │  │    (Future)      │  │
-│  └───────────────┘  └──────────────┘  └──────────────────┘  │
+│                    Application Layer                         │
+│  ┌───────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │ Tool CLIs     │  │ Web Dashboard│  │  Script Interface│   │
+│  │ (ph_*, ae_*)  │  │   (Future)   │  │    (Future)      │   │
+│  └───────────────┘  └──────────────┘  └──────────────────┘   |
 └────────────────────────────┬─────────────────────────────────┘
                              │
 ┌────────────────────────────┴─────────────────────────────────┐
-│                     Framework Runtime                         │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  Core Services                                        │   │
-│  │  • CLI Parsing & Validation (nyx_cli)                │   │
-│  │  • Unified Logging (nyx_logger)                      │   │
-│  │  • Error Handling (nyx_error)                        │   │
-│  │  • Module Discovery & Loading                        │   │
-│  │  • Session Management                                │   │
-│  └──────────────────────────────────────────────────────┘   │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  Utility Libraries                                    │   │
-│  │  • Network Interface (ph_iface)                      │   │
-│  │  • Packet Crafting (ph_packet)                       │   │
-│  │  • Socket Management (ph_socket)                     │   │
-│  │  • Address Utilities (ph_netaddr)                    │   │
-│  └──────────────────────────────────────────────────────┘   │
+│                     Framework Runtime                        │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │  Core Services                                       │    │
+│  │  • CLI Parsing & Validation (nyx_cli)                │    │
+│  │  • Unified Logging (nyx_logger)                      │    │
+│  │  • Error Handling (nyx_error)                        │    │
+│  │  • Module Discovery & Loading                        │    │
+│  │  • Session Management                                │    │
+│  └──────────────────────────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │  Utility Libraries                                   │    │
+│  │  • Network Interface (ph_iface)                      │    │
+│  │  • Packet Crafting (ph_packet)                       │    │
+│  │  • Socket Management (ph_socket)                     │    │
+│  │  • Address Utilities (ph_netaddr)                    │    │
+│  └──────────────────────────────────────────────────────┘    │
 └────────────────────────────┬─────────────────────────────────┘
                              │
 ┌────────────────────────────┴─────────────────────────────────┐
-│                   Hardware Interface Layer                    │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  • Raw Socket Operations                              │   │
-│  │  • Network Interface Control (ioctl)                  │   │
-│  │  • Packet Injection & Capture                         │   │
-│  │  • System Call Interface                              │   │
-│  └──────────────────────────────────────────────────────┘   │
+│                   Hardware Interface Layer                   │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │  • Raw Socket Operations                             │    │
+│  │  • Network Interface Control (ioctl)                 │    │
+│  │  • Packet Injection & Capture                        │    │
+│  │  • System Call Interface                             │    │
+│  └──────────────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────────────┘
 ```
 
