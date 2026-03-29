@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/N3ur0sis/nyx/workflow.schema.json",
+  "title": "NYX Workflow",
+  "description": "Schema for NYX workflow definition files",
+  "type": "object",
+  "required": ["steps"],
+  "properties": {
+    "workflow": {
+      "type": "object",
+      "description": "Workflow metadata",
+      "properties": {
+        "id":          { "type": "string", "description": "Machine-readable identifier" },
+        "name":        { "type": "string", "description": "Human-readable name" },
+        "version":     { "type": "string", "description": "Workflow version" },
+        "description": { "type": "string", "description": "One-line summary" }
+      }
+    },
+    "vars": {
+      "type": "object",
+      "description": "Workflow-level variables, overridable with --var",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "number" },
+          { "type": "boolean" }
+        ]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "description": "Array of workflow step definitions",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/step" }
+    }
+  },
+  "definitions": {
+    "step": {
+      "type": "object",
+      "description": "A single tool invocation in the workflow DAG",
+      "required": ["id", "tool"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique step identifier, referenced by ${id.results.field} expressions"
+        },
+        "tool": {
+          "type": "string",
+          "description": "Tool name. Short name (pingsweep) or binary name (nyx-pingsweep)"
+        },
+        "params": {
+          "type": "object",
+          "description": "Parameters passed to the tool. Values may contain ${...} expressions.",
+          "additionalProperties": true
+        },
+        "for_each": {
+          "type": "string",
+          "description": "Expression that evaluates to an array. The step runs once per element."
+        },
+        "when": {
+          "type": "string",
+          "description": "Boolean expression. If false, the step is skipped."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Opaque metadata for GUI tools (layout, position, color, etc.)",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

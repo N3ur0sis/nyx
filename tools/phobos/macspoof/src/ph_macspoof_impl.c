@@ -25,7 +25,7 @@
 #include "nyx_logger.h"
 #include "nyx_error.h"
 #include "ph_macspoof_api.h"
-#include "ph_iface.h"
+#include "nyx_iface.h"
 
 // Configuration constants
 #define MAX_RETRY_ATTEMPTS 5	   // Maximum retries for operations
@@ -62,41 +62,41 @@ static void interface_settle_delay(void);
 static int verify_mac_change(const char *iface, const char *expected_mac);
 
 /**
- * Maps ph_iface error codes to ph_macspoof error codes
+ * Maps nyx_iface error codes to ph_macspoof error codes
  * with enhanced error messages and suggested fixes
  */
 static int map_iface_error_to_macspoof(int err)
 {
 	switch (err)
 	{
-	case PH_IFACE_SUCCESS:
+	case NYX_IFACE_SUCCESS:
 		return PH_SUCCESS;
-	case PH_IFACE_ERR_PARAM:
+	case NYX_IFACE_ERR_PARAM:
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_INVALID_MAC, NYX_ERROR_SEV_ERROR,
 						 "Invalid parameter for interface operation",
 						 "Verify the interface name and MAC address format (XX:XX:XX:XX:XX:XX)");
 		return PH_ERR_INVALID_MAC;
-	case PH_IFACE_ERR_NOTFOUND:
+	case NYX_IFACE_ERR_NOTFOUND:
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_NO_IFACE, NYX_ERROR_SEV_ERROR,
 						 "Interface not found",
 						 "Verify the interface exists using 'ip link' or run with '-l' to list available interfaces");
 		return PH_ERR_NO_IFACE;
-	case PH_IFACE_ERR_SOCKET:
+	case NYX_IFACE_ERR_SOCKET:
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_SOCKET, NYX_ERROR_SEV_ERROR,
 						 "Socket error during network interface operation",
 						 "Check network stack health and kernel logs for more details");
 		return PH_ERR_SOCKET;
-	case PH_IFACE_ERR_IO:
+	case NYX_IFACE_ERR_IO:
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_FILE_IO, NYX_ERROR_SEV_ERROR,
 						 "I/O error during interface operation",
 						 "Verify file system permissions and available disk space");
 		return PH_ERR_FILE_IO;
-	case PH_IFACE_ERR_PERM:
+	case NYX_IFACE_ERR_PERM:
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_PERMISSION, NYX_ERROR_SEV_ERROR,
 						 "Permission denied for interface operation",
 						 "Try running the command with sudo privileges");
 		return PH_ERR_PERMISSION;
-	case PH_IFACE_ERR_BUSY:
+	case NYX_IFACE_ERR_BUSY:
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_BUSY, NYX_ERROR_SEV_WARNING,
 						 "Interface is busy or locked by another process",
 						 "Wait a moment and try again, or check if another program is using the interface");
@@ -122,7 +122,7 @@ int ph_macspoof_get_current_mac(const char *iface, char *buffer, size_t len)
 		return PH_ERR_INVALID_MAC;
 	}
 
-	int result = ph_iface_get_mac(iface, buffer, len);
+	int result = nyx_iface_get_mac(iface, buffer, len);
 	return map_iface_error_to_macspoof(result);
 }
 
@@ -139,7 +139,7 @@ int ph_macspoof_is_valid_mac(const char *mac)
 		return 0;
 	}
 
-	return ph_iface_is_valid_mac(mac);
+	return nyx_iface_is_valid_mac(mac);
 }
 
 /**
@@ -154,7 +154,7 @@ int ph_macspoof_is_interface_up(const char *iface)
 		return 0;
 	}
 
-	return ph_iface_is_up(iface);
+	return nyx_iface_is_up(iface);
 }
 
 /**
@@ -249,8 +249,10 @@ static int atomic_file_write(const char *path, const char *content)
 		fclose(fp);
 		unlink(tmp_path);
 		umask(old_mask);
+		char msg[256];
+		snprintf(msg, sizeof(msg), "Failed to write content: %s", strerror(err));
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_FILE_IO, NYX_ERROR_SEV_ERROR,
-						 "Failed to write content: %s", strerror(err));
+						 msg, "Check disk space and permissions");
 		return PH_ERR_FILE_IO;
 	}
 
@@ -261,8 +263,10 @@ static int atomic_file_write(const char *path, const char *content)
 		fclose(fp);
 		unlink(tmp_path);
 		umask(old_mask);
+		char msg[256];
+		snprintf(msg, sizeof(msg), "Failed to flush data: %s", strerror(err));
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_FILE_IO, NYX_ERROR_SEV_ERROR,
-						 "Failed to flush data: %s", strerror(err));
+						 msg, "Check disk space and permissions");
 		return PH_ERR_FILE_IO;
 	}
 
@@ -288,14 +292,14 @@ static int atomic_file_write(const char *path, const char *content)
  */
 int ph_macspoof_save_original_mac(const char *iface, const char *mac)
 {
-	if (!ph_iface_is_valid(iface))
+	if (!nyx_iface_is_valid(iface))
 	{
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_NO_IFACE, NYX_ERROR_SEV_ERROR,
 						 "Invalid interface name",
 						 "Verify the interface exists using 'ip link' or run with '-l' to list interfaces");
 		return PH_ERR_NO_IFACE;
 	}
-	if (!ph_iface_is_valid_mac(mac))
+	if (!nyx_iface_is_valid_mac(mac))
 	{
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_INVALID_MAC, NYX_ERROR_SEV_ERROR,
 						 "Invalid MAC address format",
@@ -444,7 +448,7 @@ int ph_macspoof_load_original_mac(const char *iface, char *buffer, size_t len)
 		return PH_ERR_FILE_IO;
 	}
 
-	if (!ph_iface_is_valid_mac(saved_mac))
+	if (!nyx_iface_is_valid_mac(saved_mac))
 	{
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_INVALID_MAC, NYX_ERROR_SEV_ERROR,
 						 "Invalid MAC in backup file",
@@ -541,7 +545,7 @@ int ph_macspoof_change_mac(const char *iface, const char *mac)
 		return PH_ERR_INVALID_MAC;
 	}
 
-	if (!ph_iface_is_valid(iface))
+	if (!nyx_iface_is_valid(iface))
 	{
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_NO_IFACE, NYX_ERROR_SEV_ERROR,
 						 "Interface validation failed",
@@ -549,7 +553,7 @@ int ph_macspoof_change_mac(const char *iface, const char *mac)
 		return PH_ERR_NO_IFACE;
 	}
 
-	if (!ph_iface_is_valid_mac(mac))
+	if (!nyx_iface_is_valid_mac(mac))
 	{
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_INVALID_MAC, NYX_ERROR_SEV_ERROR,
 						 "Invalid MAC address format",
@@ -571,12 +575,12 @@ int ph_macspoof_change_mac(const char *iface, const char *mac)
 	}
 
 	// Remember if interface was up
-	int was_up = ph_iface_is_up(iface);
+	int was_up = nyx_iface_is_up(iface);
 
 	// Bring interface down if it's up
 	if (was_up)
 	{
-		if (ph_iface_set_status(iface, 0) != PH_IFACE_SUCCESS)
+		if (nyx_iface_set_status(iface, 0) != NYX_IFACE_SUCCESS)
 		{
 			NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_IOCTL, NYX_ERROR_SEV_ERROR,
 							 "Failed to bring interface down",
@@ -587,11 +591,6 @@ int ph_macspoof_change_mac(const char *iface, const char *mac)
 		interface_settle_delay();
 	}
 
-	// Set up command to change MAC address using ip command
-	char cmd[256];
-	snprintf(cmd, sizeof(cmd), "ip link set dev %s address %s", iface, mac);
-
-	// Safer implementation using fork/exec:
 	int ret = -1;
 	pid_t pid = fork();
 	if (pid == 0)
@@ -619,7 +618,7 @@ int ph_macspoof_change_mac(const char *iface, const char *mac)
 		// Restore interface state if it was up
 		if (was_up)
 		{
-			ph_iface_set_status(iface, 1);
+			nyx_iface_set_status(iface, 1);
 		}
 		return PH_ERR_IOCTL;
 	}
@@ -630,9 +629,12 @@ int ph_macspoof_change_mac(const char *iface, const char *mac)
 	if (was_up)
 	{
 		interface_settle_delay();
-		if (ph_iface_set_status(iface, 1) != PH_IFACE_SUCCESS)
+		if (nyx_iface_set_status(iface, 1) != NYX_IFACE_SUCCESS)
 		{
 			nyx_log(NYX_LOG_ERROR, "Failed to restore interface %s state", iface);
+			NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_IOCTL, NYX_ERROR_SEV_ERROR,
+							 "Failed to restore interface state after MAC change",
+							 "Interface may be left in DOWN state; bring it up manually: ip link set <iface> up");
 			return PH_ERR_IOCTL;
 		}
 		nyx_log(NYX_LOG_INFO, "Interface %s restored to up state", iface);
@@ -699,25 +701,34 @@ int ph_macspoof_generate_random_mac(char *buffer, size_t len)
 		return PH_ERR_INVALID_MAC;
 	}
 
-	// Initialize random seed if needed
-	static int seeded = 0;
-	if (!seeded)
+	unsigned char entropy[4];
+	FILE *urand = fopen("/dev/urandom", "r");
+	if (!urand)
 	{
-		srand((unsigned int)time(NULL) ^ (unsigned int)getpid());
-		seeded = 1;
+		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_FILE_IO, NYX_ERROR_SEV_ERROR,
+						 "Failed to open /dev/urandom",
+						 "Ensure /dev/urandom is accessible");
+		return PH_ERR_FILE_IO;
 	}
+	if (fread(entropy, 1, sizeof(entropy), urand) != sizeof(entropy))
+	{
+		fclose(urand);
+		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_FILE_IO, NYX_ERROR_SEV_ERROR,
+						 "Failed to read from /dev/urandom",
+						 "System entropy source unavailable");
+		return PH_ERR_FILE_IO;
+	}
+	fclose(urand);
 
-	// Select random OUI from common vendors
 	size_t oui_count = sizeof(COMMON_OUIS) / sizeof(COMMON_OUIS[0]);
-	const char *oui = COMMON_OUIS[rand() % oui_count];
+	const char *oui = COMMON_OUIS[entropy[0] % oui_count];
 
-	// Generate random last 3 bytes
-	unsigned char byte4 = (unsigned char)(rand() % 256);
-	unsigned char byte5 = (unsigned char)(rand() % 256);
-	unsigned char byte6 = (unsigned char)(rand() % 256);
+	unsigned char byte4 = entropy[1];
+	unsigned char byte5 = entropy[2];
+	unsigned char byte6 = entropy[3];
 
-	// Ensure unicast address (clear multicast bit)
-	byte4 &= 0xFE;
+	/* Unicast (clear multicast bit), locally administered (set LAA bit) */
+	byte4 = (byte4 & 0xFE) | 0x02;
 
 	int ret = snprintf(buffer, len, "%s:%02X:%02X:%02X", oui, byte4, byte5, byte6);
 	if (ret >= (int)len)
@@ -736,7 +747,7 @@ int ph_macspoof_generate_random_mac(char *buffer, size_t len)
  */
 int ph_macspoof_list_interfaces_stdout(void)
 {
-	return ph_iface_print_details();
+	return nyx_iface_print_details();
 }
 
 /**
@@ -762,7 +773,7 @@ int ph_macspoof_show_mac(const char *iface)
 		return result;
 	}
 
-	int is_up = ph_iface_is_up(iface);
+	int is_up = nyx_iface_is_up(iface);
 	printf("Interface: %s [%s]\n", iface, is_up ? "UP" : "DOWN");
 	printf("Current MAC: %s\n", mac_addr);
 
@@ -834,7 +845,7 @@ int ph_macspoof_custom_mac(const char *iface, const char *mac)
 		return PH_ERR_NO_IFACE;
 	}
 
-	if (!ph_iface_is_valid_mac(mac))
+	if (!nyx_iface_is_valid_mac(mac))
 	{
 		NYX_ERROR_SET_EX(NYX_DOMAIN_MACSPOOF, PH_ERR_INVALID_MAC, NYX_ERROR_SEV_ERROR,
 						 "Invalid MAC address format",

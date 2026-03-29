@@ -1,0 +1,16 @@
+# Default owner for everything
+* @N3ur0sis
+
+# Core libraries
+/libs/ @N3ur0sis
+
+# Build system
+/CMakeLists.txt @N3ur0sis
+/cmake/ @N3ur0sis
+
+# CI/CD
+/.github/ @N3ur0sis
+
+# Documentation
+/docs/ @N3ur0sis
+/mkdocs.yml @N3ur0sis

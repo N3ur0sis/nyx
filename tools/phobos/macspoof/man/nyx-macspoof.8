@@ -1,0 +1,61 @@
+.TH NYX-MACSPOOF 8 "2025" "NYX Framework" "NYX Phobos Tools"
+.SH NAME
+nyx-macspoof \- MAC address spoofing utility
+.SH SYNOPSIS
+.B nyx-macspoof
+.SH DESCRIPTION
+.B nyx-macspoof
+modifies MAC addresses on network interfaces. It supports setting
+a specific address, generating a random locally-administered unicast
+MAC, and restoring the original hardware address.
+.PP
+When launched, it enters an interactive shell with line editing,
+tab completion, and command history. Type
+.B help
+for available commands.
+.SH INTERACTIVE COMMANDS
+.TP
+.BI show " -i iface"
+Display the current MAC address of an interface.
+.TP
+.BI random " -i iface"
+Generate and apply a random MAC address. The original is backed up.
+.TP
+.BI set " -i iface -m mac"
+Set a specific MAC address in XX:XX:XX:XX:XX:XX format.
+.TP
+.BI restore " -i iface"
+Restore the original (permanent) MAC address from backup.
+.TP
+.B list
+List all network interfaces with MAC, IP, netmask, and state.
+.TP
+.B help
+Show available commands and usage.
+.TP
+.B exit
+Exit the shell.
+.SH EXAMPLES
+.PP
+.nf
+sudo nyx-macspoof
+macspoof> list
+macspoof> show -i eth0
+macspoof> random -i eth0
+macspoof> set -i eth0 -m 00:11:22:33:44:55
+macspoof> restore -i eth0
+macspoof> exit
+.fi
+.SH NOTES
+This tool requires root privileges (network interface configuration).
+When launched without root from a terminal, it will attempt to
+re-execute itself with sudo.
+.SH SEE ALSO
+.BR nyx (1),
+.BR nyx-pingsweep (8),
+.BR nyx-portscan (8),
+.BR nyx-arpspoof (8)
+.SH AUTHOR
+Neur0sis (2025)
+.SH LICENSE
+MIT License. See the project LICENSE file for details.

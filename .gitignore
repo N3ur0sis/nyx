@@ -2,6 +2,9 @@
 build/
 bin/
 
+# Generated files
+cmake/nyx_version.h
+
 # Object files
 *.o
 *.obj
@@ -19,11 +22,6 @@ bin/
 
 # OS generated files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
 # Temporary files
@@ -38,5 +36,16 @@ Thumbs.db
 core
 core.*
 
-# Backup files
-*~
+# MkDocs generated site
+site/
+
+# Python caches (docs tooling)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Release staging
+_release/
+*.tar.gz
+*.sha256

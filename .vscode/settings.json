@@ -1,7 +1,0 @@
-{
-	"files.associations": {
-		"ph_netaddr.h": "c",
-		"nyx_logger.h": "c",
-		"inet.h": "c"
-	}
-}

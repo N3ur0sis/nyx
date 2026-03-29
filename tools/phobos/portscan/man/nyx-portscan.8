@@ -1,0 +1,88 @@
+.TH NYX-PORTSCAN 8 "2025" "NYX Framework" "NYX Phobos Tools"
+.SH NAME
+nyx-portscan \- TCP port scanner
+.SH SYNOPSIS
+.B nyx-portscan
+.SH DESCRIPTION
+.B nyx-portscan
+determines the state of TCP ports on a single target host:
+.BR open ,
+.BR closed ,
+or
+.BR filtered .
+.PP
+When launched, it enters an interactive shell with line editing,
+tab completion, and command history. Type
+.B help
+for available commands.
+.PP
+Two scan modes are supported:
+.TP
+.B TCP Connect
+Uses
+.BR connect (2)
+with non-blocking sockets. Does not require root privileges.
+.TP
+.B TCP SYN (half-open)
+Sends raw SYN packets and analyses responses. Requires root.
+Faster and stealthier than TCP Connect.
+.PP
+When SYN mode is requested but the tool is not running as root,
+it automatically falls back to TCP Connect with a warning.
+.PP
+This is an atomic, single-purpose tool. It does NOT identify
+services, grab banners, or fingerprint versions.
+.SH INTERACTIVE COMMANDS
+.TP
+.BI scan " -t ip" " [-p range]" " [-P n]" " [-m mode]" " [-T n]" " [-w ms]" " [-o]"
+Run TCP port scan. Options:
+.RS
+.TP
+.BI \-t " ip" "\fR, \fP" \-\-target " ip"
+Target IPv4 address (required).
+.TP
+.BI \-p " range" "\fR, \fP" \-\-ports " range"
+Port range (e.g. 1\-1024 or 80). Mutually exclusive with \fB\-P\fR.
+.TP
+.BI \-P " n" "\fR, \fP" \-\-top\-ports " n"
+Scan top \fIn\fR most common ports. Default 100.
+.TP
+.BI \-m " mode" "\fR, \fP" \-\-mode " mode"
+Scan mode: \fBconnect\fR or \fBsyn\fR. Default is auto.
+.TP
+.BI \-T " n" "\fR, \fP" \-\-threads " n"
+Number of scanning threads. Default is 16.
+.TP
+.BI \-w " ms" "\fR, \fP" \-\-timeout " ms"
+Per-port timeout in milliseconds. Default is 2000.
+.TP
+.BR \-o ", " \-\-open\-only
+Only display ports in the \fBopen\fR state.
+.RE
+.TP
+.B help
+Show available commands and usage.
+.TP
+.B exit
+Exit the shell.
+.SH EXAMPLES
+.PP
+.nf
+nyx-portscan
+portscan> scan -t 192.168.1.5
+portscan> scan -t 192.168.1.5 -p 1-1024 -m syn
+portscan> scan -t 10.0.0.1 -P 20 -o
+portscan> exit
+.fi
+.SH NOTES
+TCP SYN scan requires root privileges. Without root, the tool
+automatically falls back to TCP Connect mode.
+.SH SEE ALSO
+.BR nyx (1),
+.BR nyx-pingsweep (8),
+.BR nyx-macspoof (8),
+.BR nyx-arpspoof (8)
+.SH AUTHOR
+Neur0sis (2025)
+.SH LICENSE
+MIT License. See the project LICENSE file for details.

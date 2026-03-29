@@ -1,0 +1,115 @@
+.TH NYX-RUN 8 "2025" "NYX Framework" "NYX Manual"
+.SH NAME
+nyx-run \- execute NYX workflow files
+.SH SYNOPSIS
+.B nyx-run
+.RI [ OPTIONS ] " workflow.json"
+.SH DESCRIPTION
+.B nyx-run
+loads, validates, and executes a NYX workflow definition.
+It parses a JSON workflow file into a directed acyclic graph (DAG)
+of tool invocations, validates the graph, and executes steps in
+topological order. Each step invokes a NYX tool in-process via the
+global tool registry and wires results through the expression engine.
+.PP
+In human mode,
+.B nyx-run
+streams tool output live and prefixes it with step context so
+operators can follow progress without waiting for the workflow to finish.
+In JSON mode, a single structured result envelope is emitted to stdout.
+.PP
+Supports
+.B for_each
+fan-out (run a step once per array element) and
+.B when
+conditionals (skip steps based on previous results).
+.PP
+When a tool reports an error, the workflow records the step as
+.B error
+and exposes the tool's structured error details in the final output.
+Downstream steps may still be skipped or executed depending on their
+.B when
+conditions.
+.SH OPTIONS
+.TP
+.B -J, --json
+Emit a single JSON envelope to stdout. No banners, progress spinners,
+or human-readable logs are written to stdout in this mode.
+.TP
+.BI -S " ID" "\fR,\fP --session " ID
+Write workflow output to the given session ID under
+.IR ~/.nyx/sessions/ .
+.TP
+.BI -V " KEY=VALUE" "\fR,\fP --var " KEY=VALUE
+Override a workflow variable. Can be specified multiple times.
+.TP
+.BI -b " DIR" "\fR,\fP --bin-dir " DIR
+Use an explicit NYX binary directory instead of resolving sibling tools
+from the current executable path.
+.TP
+.B -d, --debug
+Enable verbose workflow logging.
+.TP
+.B -h, --help
+Show usage information.
+.TP
+.B -v, --version
+Show version information.
+.SH WORKFLOW FORMAT
+Workflow files are JSON with three sections:
+.TP
+.B workflow
+Metadata: id, name, version, description.
+.TP
+.B vars
+Key-value parameters, overridable with \fB\-\-var\fR.
+.TP
+.B steps
+Array of step objects, each with: id, tool, params, optional
+for_each, optional when, optional meta.
+.PP
+Dependencies between steps are derived automatically from
+\fB${step_id.field}\fR expressions in params, for_each, and when.
+.SH EXPRESSION LANGUAGE
+Expressions use \fB${...}\fR syntax:
+.PP
+.nf
+${vars.subnet}
+${sweep.results.hosts | filter alive == true}
+${sweep.results.alive_count > 0}
+${each.ip}
+.fi
+.PP
+Pipe operations: filter, select, count, first, flat.
+.SH EXAMPLES
+Run a workflow with live output:
+.PP
+.RS
+.B nyx-run workflows/net-discovery.json
+.RE
+.PP
+Run in JSON mode:
+.PP
+.RS
+.B nyx-run -J workflows/net-discovery.json
+.RE
+.PP
+Override a variable:
+.PP
+.RS
+.B nyx-run workflows/net-discovery.json --var subnet=10.0.0.0/24
+.RE
+.SH FILES
+.TP
+.I ~/.nyx/sessions/
+Session storage for workflow and tool envelopes.
+.SH SEE ALSO
+.BR nyx (1),
+.BR nyx-pingsweep (8),
+.BR nyx-portscan (8),
+.BR nyx-macspoof (8),
+.BR nyx-arpspoof (8)
+.SH AUTHOR
+Neur0sis (2025)
+.SH LICENSE
+MIT License. See the project LICENSE file for details.

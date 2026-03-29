@@ -1,0 +1,17 @@
+/**
+ * @file nyx_version.h
+ * @brief Auto-generated version header -- do not edit manually
+ *
+ * Configured by CMake from cmake/nyx_version.h.in.
+ * The single source of truth is project(nyx VERSION ...) in the root CMakeLists.txt.
+ */
+
+#ifndef NYX_VERSION_H
+#define NYX_VERSION_H
+
+#define NYX_VERSION       "@nyx_VERSION@"
+#define NYX_VERSION_MAJOR  @nyx_VERSION_MAJOR@
+#define NYX_VERSION_MINOR  @nyx_VERSION_MINOR@
+#define NYX_VERSION_PATCH  @nyx_VERSION_PATCH@
+
+#endif /* NYX_VERSION_H */

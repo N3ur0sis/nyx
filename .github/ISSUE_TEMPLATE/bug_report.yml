@@ -1,0 +1,80 @@
+name: Bug Report
+description: Report a bug in NYX
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please fill in the details below.
+
+  - type: input
+    id: version
+    attributes:
+      label: NYX Version
+      description: "Output of `nyx version`"
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: distro
+    attributes:
+      label: Linux Distribution
+      placeholder: "Ubuntu 24.04 / Kali 2025.1 / Arch"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Affected Tool
+      options:
+        - nyx (master CLI)
+        - nyx-run (workflow runner)
+        - pingsweep
+        - portscan
+        - macspoof
+        - arpspoof
+        - workflow engine
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened and what did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Exact commands to trigger the bug
+      placeholder: |
+        1. Run `sudo nyx`
+        2. Type `pingsweep`
+        3. Type `scan -c 10.0.0.0/24`
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output / Error
+      description: Paste any relevant output, error messages, or JSON envelopes
+      render: text
+
+  - type: dropdown
+    id: privilege
+    attributes:
+      label: Running as
+      options:
+        - root (sudo)
+        - normal user
+        - with capabilities set
+    validations:
+      required: true

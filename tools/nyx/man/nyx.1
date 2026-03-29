@@ -1,0 +1,131 @@
+.TH NYX 1 "2025" "NYX Framework" "NYX Manual"
+.SH NAME
+nyx \- NYX Offensive Security Framework master shell
+.SH SYNOPSIS
+.B nyx
+.RI [ command
+.RI [ args... ]]
+.SH DESCRIPTION
+.B nyx
+is the master interactive shell for the NYX Offensive Security
+Framework. It provides a persistent REPL with line editing, tab
+completion, command history, and access to all framework functionality.
+.PP
+When run with no arguments,
+.B nyx
+enters the interactive shell. From the shell, you can enter tool
+contexts (e.g. type
+.B pingsweep
+to get a pingsweep-specific prompt), run workflows, manage sessions,
+and inspect the framework.
+.PP
+NYX tools are invoked in-process through a shared tool registry.
+The workflow engine chains tools into directed acyclic graphs (DAGs)
+with data flowing between steps via expression-based wiring.
+.SH SHELL COMMANDS
+.TP
+.BI run " workflow.json" " [OPTIONS]"
+Execute a workflow file. Streams tool output live in human mode.
+Supports
+.B --var KEY=VALUE
+for variable overrides and
+.B -J
+for JSON output.
+.TP
+.B session list
+List all sessions stored in
+.IR ~/.nyx/sessions/ .
+.TP
+.BI "session show" " id" " [-J]"
+Show details of a specific session. Use
+.B -J
+for JSON output.
+.TP
+.BI "session clean" " [--older-than DAYS] [--force]"
+Remove session directories.
+.TP
+.B info
+Display framework version, installed tools, and session directory.
+.TP
+.B version
+Print the framework version.
+.TP
+.B help
+List all available commands.
+.TP
+.I tool-name
+Enter that tool's interactive context. The prompt changes to
+.BR nyx:tool-name> .
+Type
+.B back
+to return to the main shell.
+.TP
+.B exit / quit
+Exit the shell.
+.SH LINE EDITING
+The shell uses linenoise for line editing. Arrow keys navigate
+history (up/down) and move the cursor (left/right). Tab completes
+commands, flags, interface names, and file paths contextually.
+.SH TOOL CONTEXTS
+Typing a registered tool name (e.g.
+.BR pingsweep ,
+.BR portscan )
+enters that tool's interactive context. The tool's own commands
+become available and the prompt reflects the context. Type
+.B back
+to return to the main shell.
+.PP
+If a tool requires elevated privileges and the current process
+lacks them, a warning is displayed suggesting
+.BR "sudo nyx" .
+.SH EXAMPLES
+Start the interactive shell:
+.PP
+.RS
+.B sudo nyx
+.RE
+.PP
+Enter a tool context and run a scan:
+.PP
+.RS
+.B nyx> pingsweep
+.br
+.B nyx:pingsweep> scan -c 192.168.1.0/24
+.br
+.B nyx:pingsweep> back
+.RE
+.PP
+Run a workflow:
+.PP
+.RS
+.B nyx> run workflows/net-discovery.json
+.RE
+.PP
+Override a workflow variable:
+.PP
+.RS
+.B nyx> run workflows/net-discovery.json --var subnet=10.0.0.0/24
+.RE
+.PP
+List sessions:
+.PP
+.RS
+.B nyx> session list
+.RE
+.SH FILES
+.TP
+.I ~/.nyx/nyx_history
+Command history for the master shell.
+.TP
+.I ~/.nyx/sessions/
+Session storage directory.
+.SH SEE ALSO
+.BR nyx-run (8),
+.BR nyx-pingsweep (8),
+.BR nyx-portscan (8),
+.BR nyx-macspoof (8),
+.BR nyx-arpspoof (8)
+.SH AUTHOR
+Neur0sis (2025)
+.SH LICENSE
+MIT License. See the project LICENSE file for details.

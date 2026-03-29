@@ -1,0 +1,67 @@
+.TH NYX-PINGSWEEP 8 "2025" "NYX Framework" "NYX Phobos Tools"
+.SH NAME
+nyx-pingsweep \- ICMP network discovery tool
+.SH SYNOPSIS
+.B nyx-pingsweep
+.SH DESCRIPTION
+.B nyx-pingsweep
+performs ICMP-based network discovery by sending Echo Requests to
+every host in a given CIDR range. It identifies which hosts are
+alive and reports their round-trip latency.
+.PP
+When launched, it enters an interactive shell with line editing,
+tab completion, and command history. Type
+.B help
+for available commands.
+.PP
+Scanning is performed in parallel using a configurable number of
+threads to minimise total sweep time.
+.SH INTERACTIVE COMMANDS
+.TP
+.BI scan " -c cidr" " [-i iface]" " [-t ms]" " [-T N]"
+Run ICMP ping sweep on a CIDR range. Options:
+.RS
+.TP
+.BI \-c " cidr" "\fR, \fP" \-\-cidr " cidr"
+Target subnet in CIDR notation (required).
+.TP
+.BI \-i " iface" "\fR, \fP" \-\-interface " iface"
+Network interface to use. Auto-detected if omitted.
+.TP
+.BI \-t " ms" "\fR, \fP" \-\-timeout " ms"
+Timeout per host in milliseconds. Default is 1000.
+.TP
+.BI \-T " n" "\fR, \fP" \-\-threads " n"
+Number of scanning threads. Default is 32.
+.RE
+.TP
+.B list
+List available network interfaces with MAC, IP, and status.
+.TP
+.B help
+Show available commands and usage.
+.TP
+.B exit
+Exit the shell.
+.SH EXAMPLES
+.PP
+.nf
+sudo nyx-pingsweep
+pingsweep> scan -c 192.168.1.0/24
+pingsweep> scan -c 10.0.0.0/24 -T 8 -t 500
+pingsweep> list
+pingsweep> exit
+.fi
+.SH NOTES
+This tool requires root privileges (raw ICMP sockets). When launched
+without root from a terminal, it will attempt to re-execute itself
+with sudo.
+.SH SEE ALSO
+.BR nyx (1),
+.BR nyx-portscan (8),
+.BR nyx-macspoof (8),
+.BR nyx-arpspoof (8)
+.SH AUTHOR
+Neur0sis (2025)
+.SH LICENSE
+MIT License. See the project LICENSE file for details.

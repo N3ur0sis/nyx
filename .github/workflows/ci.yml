@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            cc: gcc
+          - compiler: clang
+            cc: clang
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential ${{ matrix.compiler }}
+
+      - name: Configure
+        env:
+          CC: ${{ matrix.cc }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build -- -j$(nproc)
+
+      - name: Install to staging prefix
+        run: |
+          DESTDIR=$(pwd)/_staging cmake --install build
+          ls -lR _staging/usr/local/bin/
+          ls -lR _staging/usr/local/share/man/ || true
+
+      - name: Smoke test
+        run: bash scripts/ci-smoke.sh
+
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: bash scripts/format-check.sh
+
+  docs:
+    name: Docs validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install docs dependencies
+        run: pip install -r requirements-docs.txt
+
+      - name: MkDocs strict build
+        run: mkdocs build --strict
+
+      - name: Docs coverage check
+        run: bash scripts/docs-check.sh

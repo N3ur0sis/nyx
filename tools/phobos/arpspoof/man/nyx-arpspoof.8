@@ -1,0 +1,76 @@
+.TH NYX-ARPSPOOF 8 "2025" "NYX Framework" "NYX Phobos Tools"
+.SH NAME
+nyx-arpspoof \- ARP cache poisoning tool
+.SH SYNOPSIS
+.B nyx-arpspoof
+.SH DESCRIPTION
+.B nyx-arpspoof
+performs ARP cache poisoning on a local network segment. It sends
+forged ARP reply packets to a target host, causing it to associate
+the attacker's MAC address with another IP (typically the default
+gateway). This redirects traffic through the attacker's machine,
+enabling man-in-the-middle analysis.
+.PP
+When launched, it enters an interactive shell with line editing,
+tab completion, and command history. Type
+.B help
+for available commands.
+.PP
+The tool supports bidirectional poisoning (both the target and the
+gateway) and automatically restores the original ARP mappings on
+exit (Ctrl-C / SIGINT / SIGTERM).
+.SH INTERACTIVE COMMANDS
+.TP
+.BI start " -i iface -t target -s spoof" " [-b]" " [-n sec]"
+Start ARP poisoning. Options:
+.RS
+.TP
+.BI \-i " iface" "\fR, \fP" \-\-interface " iface"
+Network interface (required).
+.TP
+.BI \-t " ip" "\fR, \fP" \-\-target " ip"
+Victim IP address (required).
+.TP
+.BI \-s " ip" "\fR, \fP" \-\-spoof " ip"
+IP to impersonate, e.g. the gateway (required).
+.TP
+.BR \-b ", " \-\-bidirectional
+Poison both directions.
+.TP
+.BI \-n " sec" "\fR, \fP" \-\-interval " sec"
+Seconds between ARP packets. Default is 1.
+.RE
+.TP
+.B list
+List available network interfaces.
+.TP
+.B help
+Show available commands and usage.
+.TP
+.B exit
+Exit the shell.
+.SH EXAMPLES
+.PP
+.nf
+sudo nyx-arpspoof
+arpspoof> start -i eth0 -t 192.168.1.5 -s 192.168.1.1
+arpspoof> start -i wlan0 -t 10.0.0.5 -s 10.0.0.1 -b -n 2
+arpspoof> list
+arpspoof> exit
+.fi
+.SH NOTES
+This tool requires root privileges (raw packet sockets). When launched
+without root from a terminal, it will attempt to re-execute itself
+with sudo.
+.PP
+ARP tables are automatically restored when the tool receives
+SIGINT (Ctrl-C) or SIGTERM.
+.SH SEE ALSO
+.BR nyx (1),
+.BR nyx-pingsweep (8),
+.BR nyx-portscan (8),
+.BR nyx-macspoof (8)
+.SH AUTHOR
+Neur0sis (2025)
+.SH LICENSE
+MIT License. See the project LICENSE file for details.

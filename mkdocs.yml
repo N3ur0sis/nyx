@@ -1,0 +1,75 @@
+site_name: NYX Documentation
+site_description: Documentation for the NYX penetration testing framework
+site_url: https://n3ur0sis.github.io/nyx/
+repo_url: https://github.com/N3ur0sis/nyx
+repo_name: N3ur0sis/nyx
+
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+
+markdown_extensions:
+  - tables
+  - admonitions
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/install.md
+      - Interactive Shells: getting-started/interactive-shells.md
+  - Workflows:
+      - Overview: workflows/overview.md
+      - File Format: workflows/file-format.md
+      - Expressions: workflows/expressions.md
+      - for_each and when: workflows/for-each-and-when.md
+      - "Example: Network Discovery": workflows/examples/net-discovery.md
+  - Tool Reference:
+      - Overview: tools/overview.md
+      - pingsweep: tools/pingsweep.md
+      - portscan: tools/portscan.md
+      - macspoof: tools/macspoof.md
+      - arpspoof: tools/arpspoof.md
+  - Reference:
+      - Output Envelope: reference/output-envelope.md
+      - Workflow Schema: reference/workflow-schema.md
+  - Contributors:
+      - Architecture: contributors/architecture.md
+      - Adding a Tool: contributors/add-a-tool.md
+      - Tool Contracts: contributors/tool-contracts.md
+      - Libraries:
+          - core: contributors/libraries/core.md
+          - network: contributors/libraries/network.md
+          - output: contributors/libraries/output.md
+          - shell: contributors/libraries/shell.md
+          - workflow: contributors/libraries/workflow.md
