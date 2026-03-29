@@ -30,7 +30,7 @@ echo "=== Tool documentation coverage ==="
 TOOLS=$(cd "$ROOT/bin" 2>/dev/null && ls nyx-* 2>/dev/null | sed 's/^nyx-//' || true)
 if [ -z "$TOOLS" ]; then
     echo "  (no binaries in bin/, checking source instead)"
-    TOOLS=$(ls "$ROOT/tools/phobos/" 2>/dev/null || true)
+    TOOLS=$(find "$ROOT/tools/phobos" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort || true)
 fi
 
 for tool in $TOOLS; do

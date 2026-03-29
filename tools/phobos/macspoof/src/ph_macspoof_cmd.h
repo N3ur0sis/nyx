@@ -23,7 +23,7 @@ int ph_macspoof_cmd_invoke(const nyx_json_t *params, nyx_output_ctx_t *out);
 
 /** Interactive REPL commands for macspoof. */
 extern const nyx_repl_cmd_t ph_macspoof_repl_cmds[];
-extern const size_t         ph_macspoof_repl_cmd_count;
+extern const size_t ph_macspoof_repl_cmd_count;
 
 /** Register macspoof in the global tool registry. */
 void ph_macspoof_register(void);

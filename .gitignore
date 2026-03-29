@@ -32,9 +32,9 @@ Thumbs.db
 # Logs
 *.log
 
-# Core dumps
-core
-core.*
+# Core dumps (root-level only, not libs/core/)
+/core
+core.[0-9]*
 
 # MkDocs generated site
 site/

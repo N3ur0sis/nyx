@@ -23,7 +23,7 @@ int ph_portscan_cmd_invoke(const nyx_json_t *params, nyx_output_ctx_t *out);
 
 /** Interactive REPL commands for portscan. */
 extern const nyx_repl_cmd_t ph_portscan_repl_cmds[];
-extern const size_t         ph_portscan_repl_cmd_count;
+extern const size_t ph_portscan_repl_cmd_count;
 
 /** Register portscan in the global tool registry. */
 void ph_portscan_register(void);

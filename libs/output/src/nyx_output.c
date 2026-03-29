@@ -34,7 +34,7 @@ struct nyx_output_ctx {
 
     nyx_json_t *config;
     nyx_json_t *results;
-    char       *status;
+    char *status;
     nyx_json_t *error;
 
     struct timeval start_time;
@@ -46,10 +46,12 @@ struct nyx_output_ctx {
 
 static char *safe_strdup(const char *s)
 {
-    if (!s) return NULL;
+    if (!s)
+        return NULL;
     size_t len = strlen(s);
     char *d = malloc(len + 1);
-    if (d) memcpy(d, s, len + 1);
+    if (d)
+        memcpy(d, s, len + 1);
     return d;
 }
 
@@ -57,7 +59,8 @@ static int mkdir_p(const char *path, mode_t mode)
 {
     char tmp[512];
     size_t len = strlen(path);
-    if (len >= sizeof(tmp)) return -1;
+    if (len >= sizeof(tmp))
+        return -1;
     memcpy(tmp, path, len + 1);
 
     for (char *p = tmp + 1; *p; p++) {
@@ -76,15 +79,18 @@ static int mkdir_p(const char *path, mode_t mode)
 static int generate_hex_id(char *buf, size_t len)
 {
     int fd = open("/dev/urandom", O_RDONLY);
-    if (fd < 0) return -1;
+    if (fd < 0)
+        return -1;
 
     unsigned char raw[16];
     size_t need = (len + 1) / 2;
-    if (need > sizeof(raw)) need = sizeof(raw);
+    if (need > sizeof(raw))
+        need = sizeof(raw);
 
     ssize_t n = read(fd, raw, need);
     close(fd);
-    if (n < (ssize_t)need) return -1;
+    if (n < (ssize_t)need)
+        return -1;
 
     for (size_t i = 0; i < len / 2; i++)
         snprintf(buf + i * 2, 3, "%02x", raw[i]);
@@ -95,11 +101,13 @@ static int generate_hex_id(char *buf, size_t len)
 static char *get_session_base_dir(void)
 {
     const char *home = getenv("HOME");
-    if (!home) home = "/tmp";
+    if (!home)
+        home = "/tmp";
 
     size_t len = strlen(home) + 1 + strlen(NYX_SESSION_DIR_BASE) + 1;
     char *path = malloc(len);
-    if (!path) return NULL;
+    if (!path)
+        return NULL;
     snprintf(path, len, "%s/%s", home, NYX_SESSION_DIR_BASE);
     return path;
 }
@@ -107,11 +115,15 @@ static char *get_session_base_dir(void)
 static char *get_session_dir(const char *session_id)
 {
     char *base = get_session_base_dir();
-    if (!base) return NULL;
+    if (!base)
+        return NULL;
 
     size_t len = strlen(base) + 1 + strlen(session_id) + 1;
     char *path = malloc(len);
-    if (!path) { free(base); return NULL; }
+    if (!path) {
+        free(base);
+        return NULL;
+    }
     snprintf(path, len, "%s/%s", base, session_id);
     free(base);
     return path;
@@ -134,7 +146,8 @@ static char *get_iso_timestamp(void)
     struct tm tm_info;
     gmtime_r(&now, &tm_info);
     char *buf = malloc(32);
-    if (!buf) return NULL;
+    if (!buf)
+        return NULL;
     strftime(buf, 32, "%Y-%m-%dT%H:%M:%SZ", &tm_info);
     return buf;
 }
@@ -143,7 +156,7 @@ static double elapsed_ms(const struct timeval *start)
 {
     struct timeval now;
     gettimeofday(&now, NULL);
-    double s  = (double)(now.tv_sec  - start->tv_sec)  * 1000.0;
+    double s = (double)(now.tv_sec - start->tv_sec) * 1000.0;
     double us = (double)(now.tv_usec - start->tv_usec) / 1000.0;
     return s + us;
 }
@@ -151,13 +164,14 @@ static double elapsed_ms(const struct timeval *start)
 static nyx_json_t *build_envelope(nyx_output_ctx_t *ctx)
 {
     nyx_json_t *root = nyx_json_object();
-    if (!root) return NULL;
+    if (!root)
+        return NULL;
 
     /* nyx metadata */
     nyx_json_t *nyx = nyx_json_object();
     nyx_json_set(nyx, "version", nyx_json_string(ctx->version ? ctx->version : "unknown"));
-    nyx_json_set(nyx, "tool",    nyx_json_string(ctx->tool    ? ctx->tool    : "unknown"));
-    nyx_json_set(nyx, "module",  nyx_json_string(ctx->module  ? ctx->module  : "unknown"));
+    nyx_json_set(nyx, "tool", nyx_json_string(ctx->tool ? ctx->tool : "unknown"));
+    nyx_json_set(nyx, "module", nyx_json_string(ctx->module ? ctx->module : "unknown"));
 
     char *ts = get_iso_timestamp();
     nyx_json_set(nyx, "timestamp", nyx_json_string(ts ? ts : ""));
@@ -177,8 +191,7 @@ static nyx_json_t *build_envelope(nyx_output_ctx_t *ctx)
         nyx_json_set(root, "config", nyx_json_object());
 
     /* status */
-    nyx_json_set(root, "status",
-                 nyx_json_string(ctx->status ? ctx->status : "success"));
+    nyx_json_set(root, "status", nyx_json_string(ctx->status ? ctx->status : "success"));
 
     /* error */
     if (ctx->error)
@@ -196,9 +209,9 @@ static nyx_json_t *build_envelope(nyx_output_ctx_t *ctx)
      * Ownership of config, results, error trees transferred into envelope.
      * NULL them out so nyx_output_free doesn't double-free.
      */
-    ctx->config  = NULL;
+    ctx->config = NULL;
     ctx->results = NULL;
-    ctx->error   = NULL;
+    ctx->error = NULL;
 
     return root;
 }
@@ -207,16 +220,16 @@ static nyx_json_t *build_envelope(nyx_output_ctx_t *ctx)
  *  Public API
  * ==================================================================== */
 
-nyx_output_ctx_t *nyx_output_init(const char *tool, const char *module,
-                                   const char *version)
+nyx_output_ctx_t *nyx_output_init(const char *tool, const char *module, const char *version)
 {
     nyx_output_ctx_t *ctx = calloc(1, sizeof(*ctx));
-    if (!ctx) return NULL;
+    if (!ctx)
+        return NULL;
 
-    ctx->tool    = safe_strdup(tool);
-    ctx->module  = safe_strdup(module);
+    ctx->tool = safe_strdup(tool);
+    ctx->module = safe_strdup(module);
     ctx->version = safe_strdup(version);
-    ctx->status  = safe_strdup("success");
+    ctx->status = safe_strdup("success");
     gettimeofday(&ctx->start_time, NULL);
 
     return ctx;
@@ -224,7 +237,8 @@ nyx_output_ctx_t *nyx_output_init(const char *tool, const char *module,
 
 nyx_json_t *nyx_output_build_envelope(nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return NULL;
+    if (!ctx)
+        return NULL;
 
     if (ctx->status && strcmp(ctx->status, "success") == 0 && !ctx->error) {
         const nyx_error_context_t *err = nyx_error_get();
@@ -237,10 +251,12 @@ nyx_json_t *nyx_output_build_envelope(nyx_output_ctx_t *ctx)
 
 int nyx_output_finish(nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return -1;
+    if (!ctx)
+        return -1;
 
     nyx_json_t *envelope = nyx_output_build_envelope(ctx);
-    if (!envelope) return -1;
+    if (!envelope)
+        return -1;
 
     int ret = 0;
 
@@ -292,7 +308,8 @@ int nyx_output_finish(nyx_output_ctx_t *ctx)
 
 void nyx_output_free(nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return;
+    if (!ctx)
+        return;
     free(ctx->tool);
     free(ctx->module);
     free(ctx->version);
@@ -310,21 +327,24 @@ void nyx_output_free(nyx_output_ctx_t *ctx)
 
 int nyx_output_set_session(nyx_output_ctx_t *ctx, const char *session_id)
 {
-    if (!ctx || !session_id) return -1;
+    if (!ctx || !session_id)
+        return -1;
 
     free(ctx->session_id);
     ctx->session_id = safe_strdup(session_id);
 
     free(ctx->session_dir);
     ctx->session_dir = get_session_dir(session_id);
-    if (!ctx->session_dir) return -1;
+    if (!ctx->session_dir)
+        return -1;
 
     return ensure_session_dir(ctx->session_dir);
 }
 
 int nyx_output_new_session(nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return -1;
+    if (!ctx)
+        return -1;
 
     char id[NYX_SESSION_ID_LEN + 1];
     if (generate_hex_id(id, NYX_SESSION_ID_LEN) != 0)
@@ -342,25 +362,28 @@ const char *nyx_output_get_session_id(const nyx_output_ctx_t *ctx)
 
 void nyx_output_set_json_stdout(nyx_output_ctx_t *ctx, int enabled)
 {
-    if (ctx) ctx->json_stdout = enabled ? 1 : 0;
+    if (ctx)
+        ctx->json_stdout = enabled ? 1 : 0;
 }
 
 int nyx_output_is_json_mode(const nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return 0;
+    if (!ctx)
+        return 0;
     return ctx->json_stdout;
 }
 
 int nyx_output_has_structured_sink(const nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return 0;
-    return ctx->json_stdout ||
-           (ctx->session_dir && ctx->session_dir[0]);
+    if (!ctx)
+        return 0;
+    return ctx->json_stdout || (ctx->session_dir && ctx->session_dir[0]);
 }
 
 void nyx_output_set_capture_path(nyx_output_ctx_t *ctx, const char *path)
 {
-    if (!ctx) return;
+    if (!ctx)
+        return;
     free(ctx->capture_path);
     ctx->capture_path = safe_strdup(path && path[0] ? path : NULL);
 }
@@ -369,37 +392,47 @@ void nyx_output_set_capture_path(nyx_output_ctx_t *ctx, const char *path)
 
 void nyx_output_set_config(nyx_output_ctx_t *ctx, nyx_json_t *config)
 {
-    if (!ctx) { nyx_json_free(config); return; }
+    if (!ctx) {
+        nyx_json_free(config);
+        return;
+    }
     nyx_json_free(ctx->config);
     ctx->config = config;
 }
 
 void nyx_output_set_results(nyx_output_ctx_t *ctx, nyx_json_t *results)
 {
-    if (!ctx) { nyx_json_free(results); return; }
+    if (!ctx) {
+        nyx_json_free(results);
+        return;
+    }
     nyx_json_free(ctx->results);
     ctx->results = results;
 }
 
 void nyx_output_set_status(nyx_output_ctx_t *ctx, const char *status)
 {
-    if (!ctx) return;
+    if (!ctx)
+        return;
     free(ctx->status);
     ctx->status = safe_strdup(status);
 }
 
 void nyx_output_set_error_from_ctx(nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return;
+    if (!ctx)
+        return;
     const nyx_error_context_t *err = nyx_error_get();
-    if (!err || err->code == 0) return;
+    if (!err || err->code == 0)
+        return;
 
     nyx_json_t *e = nyx_json_object();
-    nyx_json_set(e, "domain",  nyx_json_int(err->domain));
-    nyx_json_set(e, "code",    nyx_json_int(err->code));
+    nyx_json_set(e, "domain", nyx_json_int(err->domain));
+    nyx_json_set(e, "code", nyx_json_int(err->code));
 
     const char *msg = err->message;
-    nyx_json_set(e, "message", nyx_json_string(msg[0] ? msg : nyx_error_str(err->domain, err->code)));
+    nyx_json_set(e, "message",
+                 nyx_json_string(msg[0] ? msg : nyx_error_str(err->domain, err->code)));
 
     if (err->suggestion[0])
         nyx_json_set(e, "suggestion", nyx_json_string(err->suggestion));
@@ -412,7 +445,8 @@ void nyx_output_set_error_from_ctx(nyx_output_ctx_t *ctx)
 
 void nyx_output_emit_error(nyx_output_ctx_t *ctx)
 {
-    if (!ctx) return;
+    if (!ctx)
+        return;
     nyx_output_set_error_from_ctx(ctx);
     if (!ctx->error) {
         free(ctx->status);
@@ -423,7 +457,8 @@ void nyx_output_emit_error(nyx_output_ctx_t *ctx)
 
 void nyx_output_set_error_msg(nyx_output_ctx_t *ctx, const char *message)
 {
-    if (!ctx) return;
+    if (!ctx)
+        return;
 
     nyx_json_t *e = nyx_json_object();
     nyx_json_set(e, "message", nyx_json_string(message ? message : "Unknown error"));
@@ -436,7 +471,8 @@ void nyx_output_set_error_msg(nyx_output_ctx_t *ctx, const char *message)
 
 void nyx_output_emit_error_msg(nyx_output_ctx_t *ctx, const char *message)
 {
-    if (!ctx) return;
+    if (!ctx)
+        return;
     nyx_output_set_error_msg(ctx, message);
     nyx_output_finish(ctx);
 }
@@ -452,20 +488,22 @@ int nyx_output_argv_has_json(int argc, char **argv)
 
 /* ---- Load previous output ---- */
 
-nyx_json_t *nyx_output_load_results(const char *session_id,
-                                     const char *tool_name)
+nyx_json_t *nyx_output_load_results(const char *session_id, const char *tool_name)
 {
-    if (!session_id || !tool_name) return NULL;
+    if (!session_id || !tool_name)
+        return NULL;
 
     char *dir = get_session_dir(session_id);
-    if (!dir) return NULL;
+    if (!dir)
+        return NULL;
 
     char path[512];
     snprintf(path, sizeof(path), "%s/%s.nyx.json", dir, tool_name);
     free(dir);
 
     nyx_json_t *root = nyx_json_parse_file(path);
-    if (!root) return NULL;
+    if (!root)
+        return NULL;
 
     /* Return just the "results" subtree */
     nyx_json_t *results = nyx_json_get(root, "results");
@@ -484,12 +522,12 @@ nyx_json_t *nyx_output_load_results(const char *session_id,
 
 /* ---- CLI helper ---- */
 
-nyx_output_ctx_t *nyx_output_from_cli(const char *tool, const char *module,
-                                       const char *version,
-                                       int has_json, const char *session_id)
+nyx_output_ctx_t *nyx_output_from_cli(const char *tool, const char *module, const char *version,
+                                      int has_json, const char *session_id)
 {
     nyx_output_ctx_t *ctx = nyx_output_init(tool, module, version);
-    if (!ctx) return NULL;
+    if (!ctx)
+        return NULL;
 
     if (has_json) {
         nyx_output_set_json_stdout(ctx, 1);

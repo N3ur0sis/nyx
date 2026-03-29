@@ -60,9 +60,8 @@ int nyx_wf_validate(const nyx_workflow_t *wf);
  * @param bin_dir    Path to NYX binaries, or NULL for PATH lookup
  * @return Context or NULL on error
  */
-nyx_wf_ctx_t *nyx_wf_ctx_create(const nyx_workflow_t *wf,
-                                  const char *session_id,
-                                  const char *bin_dir);
+nyx_wf_ctx_t *nyx_wf_ctx_create(const nyx_workflow_t *wf, const char *session_id,
+                                const char *bin_dir);
 
 /**
  * Execute all steps in topological order.
@@ -98,8 +97,7 @@ void nyx_wf_free(nyx_workflow_t *wf);
  * @param order_len  Number of entries in order
  * @return NYX_WF_SUCCESS, NYX_WF_ERR_CYCLE, or other error
  */
-int nyx_wf_topo_sort(const nyx_workflow_t *wf,
-                      size_t **order, size_t *order_len);
+int nyx_wf_topo_sort(const nyx_workflow_t *wf, size_t **order, size_t *order_len);
 
 #ifdef __cplusplus
 }

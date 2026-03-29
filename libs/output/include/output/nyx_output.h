@@ -35,8 +35,7 @@ extern "C" {
  * @param version Version string (e.g. "0.1.0")
  * @return Context pointer or NULL on allocation failure
  */
-nyx_output_ctx_t *nyx_output_init(const char *tool, const char *module,
-                                   const char *version);
+nyx_output_ctx_t *nyx_output_init(const char *tool, const char *module, const char *version);
 
 /**
  * Finalizes the output: serializes the envelope to stdout (if json mode)
@@ -160,8 +159,7 @@ int nyx_output_argv_has_json(int argc, char **argv);
  * @param tool_name  Tool name (filename stem, e.g. "pingsweep")
  * @return Parsed JSON tree or NULL on error. Caller must nyx_json_free().
  */
-nyx_json_t *nyx_output_load_results(const char *session_id,
-                                     const char *tool_name);
+nyx_json_t *nyx_output_load_results(const char *session_id, const char *tool_name);
 
 /* ---- CLI helper ---- */
 
@@ -175,9 +173,8 @@ nyx_json_t *nyx_output_load_results(const char *session_id,
  * @param session_id  Value of --session/-S flag, or NULL
  * @return Configured context, or NULL on error
  */
-nyx_output_ctx_t *nyx_output_from_cli(const char *tool, const char *module,
-                                       const char *version,
-                                       int has_json, const char *session_id);
+nyx_output_ctx_t *nyx_output_from_cli(const char *tool, const char *module, const char *version,
+                                      int has_json, const char *session_id);
 
 #ifdef __cplusplus
 }

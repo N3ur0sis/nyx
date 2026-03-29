@@ -31,9 +31,9 @@
  * @name Constants
  * @{
  */
-#define PH_ARPSPOOF_MAX_IP_LEN    16   /**< Max IPv4 string length (incl. NUL) */
-#define PH_ARPSPOOF_MAX_MAC_LEN   18   /**< Max MAC string length (incl. NUL) */
-#define PH_ARPSPOOF_DEFAULT_INTERVAL 1 /**< Default send interval in seconds */
+#define PH_ARPSPOOF_MAX_IP_LEN       16 /**< Max IPv4 string length (incl. NUL) */
+#define PH_ARPSPOOF_MAX_MAC_LEN      18 /**< Max MAC string length (incl. NUL) */
+#define PH_ARPSPOOF_DEFAULT_INTERVAL 1  /**< Default send interval in seconds */
 /** @} */
 
 /**
@@ -41,16 +41,16 @@
  * Return values for API functions
  * @{
  */
-#define PH_ARPSPOOF_SUCCESS            0   /**< Operation completed successfully */
-#define PH_ARPSPOOF_ERR_INVALID_PARAM -1   /**< Invalid parameter provided */
-#define PH_ARPSPOOF_ERR_NO_IFACE     -2   /**< Interface not found or invalid */
-#define PH_ARPSPOOF_ERR_SOCKET       -3   /**< Socket creation or operation failed */
-#define PH_ARPSPOOF_ERR_SEND         -4   /**< Failed to send ARP packet */
-#define PH_ARPSPOOF_ERR_RESOLVE      -5   /**< Failed to resolve MAC for IP */
-#define PH_ARPSPOOF_ERR_PERMISSION   -6   /**< Insufficient permissions (need root) */
-#define PH_ARPSPOOF_ERR_INVALID_IP   -7   /**< Invalid IP address format */
-#define PH_ARPSPOOF_ERR_BUSY         -8   /**< Spoofing session already active */
-#define PH_ARPSPOOF_ERR_NOT_RUNNING  -9   /**< No active spoofing session */
+#define PH_ARPSPOOF_SUCCESS           0  /**< Operation completed successfully */
+#define PH_ARPSPOOF_ERR_INVALID_PARAM -1 /**< Invalid parameter provided */
+#define PH_ARPSPOOF_ERR_NO_IFACE      -2 /**< Interface not found or invalid */
+#define PH_ARPSPOOF_ERR_SOCKET        -3 /**< Socket creation or operation failed */
+#define PH_ARPSPOOF_ERR_SEND          -4 /**< Failed to send ARP packet */
+#define PH_ARPSPOOF_ERR_RESOLVE       -5 /**< Failed to resolve MAC for IP */
+#define PH_ARPSPOOF_ERR_PERMISSION    -6 /**< Insufficient permissions (need root) */
+#define PH_ARPSPOOF_ERR_INVALID_IP    -7 /**< Invalid IP address format */
+#define PH_ARPSPOOF_ERR_BUSY          -8 /**< Spoofing session already active */
+#define PH_ARPSPOOF_ERR_NOT_RUNNING   -9 /**< No active spoofing session */
 /** @} */
 
 /**
@@ -60,8 +60,8 @@ typedef struct {
     char iface[16];                         /**< Network interface name */
     char target_ip[PH_ARPSPOOF_MAX_IP_LEN]; /**< Target IP to poison */
     char spoof_ip[PH_ARPSPOOF_MAX_IP_LEN];  /**< IP address to impersonate */
-    int interval;                            /**< Send interval in seconds */
-    int bidirectional;                       /**< Poison both target and gateway */
+    int interval;                           /**< Send interval in seconds */
+    int bidirectional;                      /**< Poison both target and gateway */
 } ph_arpspoof_config_t;
 
 /**
@@ -83,8 +83,7 @@ extern "C" {
  * @param session Pointer to receive the allocated session handle
  * @return PH_ARPSPOOF_SUCCESS on success, or an error code
  */
-int ph_arpspoof_init(const ph_arpspoof_config_t *config,
-                     ph_arpspoof_session_t **session);
+int ph_arpspoof_init(const ph_arpspoof_config_t *config, ph_arpspoof_session_t **session);
 
 /**
  * Releases all resources held by a spoofing session.
@@ -107,8 +106,8 @@ void ph_arpspoof_cleanup(ph_arpspoof_session_t *session);
  * @param len     Buffer length
  * @return PH_ARPSPOOF_SUCCESS on success, or an error code
  */
-int ph_arpspoof_resolve_mac(const ph_arpspoof_session_t *session,
-                            const char *ip, char *mac_buf, size_t len);
+int ph_arpspoof_resolve_mac(const ph_arpspoof_session_t *session, const char *ip, char *mac_buf,
+                            size_t len);
 
 /**
  * Sends a single forged ARP reply packet.
@@ -121,10 +120,8 @@ int ph_arpspoof_resolve_mac(const ph_arpspoof_session_t *session,
  * @param impersonated_ip IP we claim to own
  * @return PH_ARPSPOOF_SUCCESS on success, or an error code
  */
-int ph_arpspoof_send_reply(const ph_arpspoof_session_t *session,
-                           const char *victim_ip,
-                           const uint8_t *victim_mac,
-                           const char *impersonated_ip);
+int ph_arpspoof_send_reply(const ph_arpspoof_session_t *session, const char *victim_ip,
+                           const uint8_t *victim_mac, const char *impersonated_ip);
 
 /**
  * Starts the continuous ARP poisoning loop.

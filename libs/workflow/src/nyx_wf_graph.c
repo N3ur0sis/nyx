@@ -19,14 +19,20 @@
 
 int nyx_wf_topo_sort(const nyx_workflow_t *wf, size_t **order, size_t *order_len)
 {
-    if (!wf || !order || !order_len) return NYX_WF_ERR_PARAM;
+    if (!wf || !order || !order_len)
+        return NYX_WF_ERR_PARAM;
 
     size_t n = wf->step_count;
-    if (n == 0) { *order = NULL; *order_len = 0; return NYX_WF_SUCCESS; }
+    if (n == 0) {
+        *order = NULL;
+        *order_len = 0;
+        return NYX_WF_SUCCESS;
+    }
 
     /* Compute in-degree for each node */
     size_t *in_deg = calloc(n, sizeof(size_t));
-    if (!in_deg) return NYX_WF_ERR_MEMORY;
+    if (!in_deg)
+        return NYX_WF_ERR_MEMORY;
 
     for (size_t i = 0; i < n; i++) {
         in_deg[i] = wf->steps[i].dep_count;
@@ -36,7 +42,9 @@ int nyx_wf_topo_sort(const nyx_workflow_t *wf, size_t **order, size_t *order_len
     size_t *downstream_count = calloc(n, sizeof(size_t));
     size_t **downstream = calloc(n, sizeof(size_t *));
     if (!downstream_count || !downstream) {
-        free(in_deg); free(downstream_count); free(downstream);
+        free(in_deg);
+        free(downstream_count);
+        free(downstream);
         return NYX_WF_ERR_MEMORY;
     }
 
@@ -63,9 +71,13 @@ int nyx_wf_topo_sort(const nyx_workflow_t *wf, size_t **order, size_t *order_len
     size_t *queue = malloc(n * sizeof(size_t));
     size_t *result = malloc(n * sizeof(size_t));
     if (!queue || !result) {
-        free(in_deg); free(queue); free(result);
-        for (size_t i = 0; i < n; i++) free(downstream[i]);
-        free(downstream); free(downstream_count);
+        free(in_deg);
+        free(queue);
+        free(result);
+        for (size_t i = 0; i < n; i++)
+            free(downstream[i]);
+        free(downstream);
+        free(downstream_count);
         return NYX_WF_ERR_MEMORY;
     }
 
@@ -92,14 +104,14 @@ int nyx_wf_topo_sort(const nyx_workflow_t *wf, size_t **order, size_t *order_len
     /* Cleanup temporaries */
     free(in_deg);
     free(queue);
-    for (size_t i = 0; i < n; i++) free(downstream[i]);
+    for (size_t i = 0; i < n; i++)
+        free(downstream[i]);
     free(downstream);
     free(downstream_count);
 
     /* Cycle detection */
     if (r_len != n) {
-        nyx_log(NYX_LOG_ERROR,
-                "Workflow contains a cycle (sorted %zu of %zu steps)", r_len, n);
+        nyx_log(NYX_LOG_ERROR, "Workflow contains a cycle (sorted %zu of %zu steps)", r_len, n);
         free(result);
         return NYX_WF_ERR_CYCLE;
     }
@@ -115,7 +127,8 @@ int nyx_wf_topo_sort(const nyx_workflow_t *wf, size_t **order, size_t *order_len
 
 int nyx_wf_validate(const nyx_workflow_t *wf)
 {
-    if (!wf) return NYX_WF_ERR_PARAM;
+    if (!wf)
+        return NYX_WF_ERR_PARAM;
 
     /* Check all step IDs are unique */
     for (size_t i = 0; i < wf->step_count; i++) {
@@ -128,8 +141,7 @@ int nyx_wf_validate(const nyx_workflow_t *wf)
             return NYX_WF_ERR_VALIDATE;
         }
         for (size_t j = i + 1; j < wf->step_count; j++) {
-            if (wf->steps[j].id &&
-                strcmp(wf->steps[i].id, wf->steps[j].id) == 0) {
+            if (wf->steps[j].id && strcmp(wf->steps[i].id, wf->steps[j].id) == 0) {
                 nyx_log(NYX_LOG_ERROR, "Duplicate step ID: '%s'", wf->steps[i].id);
                 return NYX_WF_ERR_VALIDATE;
             }
@@ -140,8 +152,7 @@ int nyx_wf_validate(const nyx_workflow_t *wf)
     for (size_t i = 0; i < wf->step_count; i++) {
         for (size_t d = 0; d < wf->steps[i].dep_count; d++) {
             if (wf->steps[i].deps[d] >= wf->step_count) {
-                nyx_log(NYX_LOG_ERROR,
-                        "Step '%s' has invalid dependency index %zu",
+                nyx_log(NYX_LOG_ERROR, "Step '%s' has invalid dependency index %zu",
                         wf->steps[i].id, wf->steps[i].deps[d]);
                 return NYX_WF_ERR_MISSING_REF;
             }
@@ -150,8 +161,7 @@ int nyx_wf_validate(const nyx_workflow_t *wf)
         /* Self-dependency check */
         for (size_t d = 0; d < wf->steps[i].dep_count; d++) {
             if (wf->steps[i].deps[d] == i) {
-                nyx_log(NYX_LOG_ERROR,
-                        "Step '%s' depends on itself", wf->steps[i].id);
+                nyx_log(NYX_LOG_ERROR, "Step '%s' depends on itself", wf->steps[i].id);
                 return NYX_WF_ERR_CYCLE;
             }
         }

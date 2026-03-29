@@ -34,11 +34,11 @@ struct nyx_repl {
     char *welcome;
     char *history_path;
     void *userdata;
-    int   exit_requested;
+    int exit_requested;
 
-    nyx_repl_cmd_t   *cmds;
-    size_t            cmd_count;
-    size_t            cmd_cap;
+    nyx_repl_cmd_t *cmds;
+    size_t cmd_count;
+    size_t cmd_cap;
     nyx_repl_handler_fn fallback;
 };
 
@@ -46,10 +46,12 @@ struct nyx_repl {
 
 static char *safe_strdup(const char *s)
 {
-    if (!s) return NULL;
+    if (!s)
+        return NULL;
     size_t len = strlen(s);
     char *d = malloc(len + 1);
-    if (d) memcpy(d, s, len + 1);
+    if (d)
+        memcpy(d, s, len + 1);
     return d;
 }
 
@@ -57,13 +59,16 @@ static int mkdir_p(const char *path, mode_t mode)
 {
     char tmp[512];
     size_t len = strlen(path);
-    if (len >= sizeof(tmp)) return -1;
+    if (len >= sizeof(tmp))
+        return -1;
     memcpy(tmp, path, len + 1);
 
     for (char *p = tmp + 1; *p; p++) {
-        if (*p != '/') continue;
+        if (*p != '/')
+            continue;
         *p = '\0';
-        if (mkdir(tmp, mode) != 0 && errno != EEXIST) return -1;
+        if (mkdir(tmp, mode) != 0 && errno != EEXIST)
+            return -1;
         *p = '/';
     }
     return (mkdir(tmp, mode) != 0 && errno != EEXIST) ? -1 : 0;
@@ -72,7 +77,8 @@ static int mkdir_p(const char *path, mode_t mode)
 static char *history_path_for(const char *name)
 {
     const char *home = getenv("HOME");
-    if (!home) home = "/tmp";
+    if (!home)
+        home = "/tmp";
 
     char dir[512];
     snprintf(dir, sizeof(dir), "%s/.nyx", home);
@@ -80,7 +86,8 @@ static char *history_path_for(const char *name)
 
     size_t need = strlen(dir) + 1 + strlen(name) + strlen("_history") + 1;
     char *path = malloc(need);
-    if (!path) return NULL;
+    if (!path)
+        return NULL;
     snprintf(path, need, "%s/%s_history", dir, name);
     return path;
 }
@@ -90,7 +97,8 @@ static char *history_path_for(const char *name)
 static void completion_callback(const char *buf, linenoiseCompletions *lc)
 {
     const nyx_repl_t *repl = g_active_repl;
-    if (!repl) return;
+    if (!repl)
+        return;
 
     size_t buflen = strlen(buf);
 
@@ -103,9 +111,7 @@ static void completion_callback(const char *buf, linenoiseCompletions *lc)
             if (name && strncmp(name, buf, buflen) == 0)
                 linenoiseAddCompletion(lc, name);
         }
-        static const char *builtins[] = {
-            "help", "history", "exit", "quit", NULL
-        };
+        static const char *builtins[] = {"help", "history", "exit", "quit", NULL};
         for (int i = 0; builtins[i]; i++) {
             if (strncmp(builtins[i], buf, buflen) == 0)
                 linenoiseAddCompletion(lc, builtins[i]);
@@ -127,7 +133,8 @@ static void completion_callback(const char *buf, linenoiseCompletions *lc)
     /* After first token: complete flags or values */
     const char *last_tok = buf;
     for (const char *p = buf; *p; p++) {
-        if (*p == ' ') last_tok = p + 1;
+        if (*p == ' ')
+            last_tok = p + 1;
     }
 
     size_t last_len = strlen(last_tok);
@@ -135,7 +142,8 @@ static void completion_callback(const char *buf, linenoiseCompletions *lc)
     /* Extract the command name (first word) */
     size_t cmd_len = (size_t)(space - buf);
     char cmd_name[64];
-    if (cmd_len >= sizeof(cmd_name)) return;
+    if (cmd_len >= sizeof(cmd_name))
+        return;
     memcpy(cmd_name, buf, cmd_len);
     cmd_name[cmd_len] = '\0';
 
@@ -147,20 +155,21 @@ static void completion_callback(const char *buf, linenoiseCompletions *lc)
             break;
         }
     }
-    if (!cmd) return;
+    if (!cmd)
+        return;
 
     /* Complete flags from the command's flag metadata */
     if (cmd->flags && cmd->flag_count > 0 && last_tok[0] == '-') {
         for (size_t i = 0; i < cmd->flag_count; i++) {
             const nyx_repl_flag_t *f = &cmd->flags[i];
-            if (!f->name) continue;
+            if (!f->name)
+                continue;
 
             char full_line[512];
             size_t prefix_len = (size_t)(last_tok - buf);
 
             if (f->name[0] == '-' && strncmp(f->name, last_tok, last_len) == 0) {
-                snprintf(full_line, sizeof(full_line), "%.*s%s",
-                         (int)prefix_len, buf, f->name);
+                snprintf(full_line, sizeof(full_line), "%.*s%s", (int)prefix_len, buf, f->name);
                 linenoiseAddCompletion(lc, full_line);
             }
         }
@@ -183,8 +192,7 @@ static void completion_callback(const char *buf, linenoiseCompletions *lc)
         if (prev_flag) {
             nyx_compl_type_t ctype = NYX_COMPL_NONE;
             for (size_t i = 0; i < cmd->flag_count; i++) {
-                if (cmd->flags[i].name &&
-                    strcmp(cmd->flags[i].name, prev_flag) == 0) {
+                if (cmd->flags[i].name && strcmp(cmd->flags[i].name, prev_flag) == 0) {
                     ctype = cmd->flags[i].compl_type;
                     break;
                 }
@@ -198,8 +206,8 @@ static void completion_callback(const char *buf, linenoiseCompletions *lc)
                             continue;
                         char full_line[512];
                         size_t prefix_len = (size_t)(last_tok - buf);
-                        snprintf(full_line, sizeof(full_line), "%.*s%s",
-                                 (int)prefix_len, buf, p->if_name);
+                        snprintf(full_line, sizeof(full_line), "%.*s%s", (int)prefix_len, buf,
+                                 p->if_name);
                         linenoiseAddCompletion(lc, full_line);
                     }
                     if_freenameindex(ifs);
@@ -230,15 +238,10 @@ static void completion_callback(const char *buf, linenoiseCompletions *lc)
                         char full_line[1024];
                         size_t prefix_len = (size_t)(last_tok - buf);
                         if (slash) {
-                            snprintf(full_line, sizeof(full_line),
-                                     "%.*s%.*s/%s",
-                                     (int)prefix_len, buf,
-                                     (int)(slash - partial + 1), partial,
-                                     ent->d_name);
+                            snprintf(full_line, sizeof(full_line), "%.*s%.*s/%s", (int)prefix_len,
+                                     buf, (int)(slash - partial + 1), partial, ent->d_name);
                         } else {
-                            snprintf(full_line, sizeof(full_line),
-                                     "%.*s%s",
-                                     (int)prefix_len, buf,
+                            snprintf(full_line, sizeof(full_line), "%.*s%s", (int)prefix_len, buf,
                                      ent->d_name);
                         }
                         linenoiseAddCompletion(lc, full_line);
@@ -263,13 +266,17 @@ char **nyx_repl_tokenize(const char *line, int *argc_out)
     size_t tlen = 0;
     int in_single = 0, in_double = 0, escape = 0;
 
-    if (!argv) { *argc_out = 0; return NULL; }
+    if (!argv) {
+        *argc_out = 0;
+        return NULL;
+    }
 
-    for (const char *p = line; ; p++) {
+    for (const char *p = line;; p++) {
         char c = *p;
 
         if (escape) {
-            if (tlen + 1 < sizeof(token)) token[tlen++] = c;
+            if (tlen + 1 < sizeof(token))
+                token[tlen++] = c;
             escape = 0;
         } else if (c == '\\' && !in_single) {
             escape = 1;
@@ -277,23 +284,25 @@ char **nyx_repl_tokenize(const char *line, int *argc_out)
             in_double = !in_double;
         } else if (c == '\'' && !in_double) {
             in_single = !in_single;
-        } else if ((c == '\0' || isspace((unsigned char)c)) &&
-                   !in_single && !in_double) {
+        } else if ((c == '\0' || isspace((unsigned char)c)) && !in_single && !in_double) {
             if (tlen > 0) {
                 token[tlen] = '\0';
                 if (argc == cap) {
                     size_t nc = cap * 2;
                     char **tmp = realloc(argv, (nc + 1) * sizeof(char *));
-                    if (!tmp) goto fail;
+                    if (!tmp)
+                        goto fail;
                     argv = tmp;
                     cap = nc;
                 }
                 argv[argc] = safe_strdup(token);
-                if (!argv[argc]) goto fail;
+                if (!argv[argc])
+                    goto fail;
                 argc++;
                 tlen = 0;
             }
-            if (c == '\0') break;
+            if (c == '\0')
+                break;
         } else if (tlen + 1 < sizeof(token)) {
             token[tlen++] = c;
         }
@@ -304,7 +313,8 @@ char **nyx_repl_tokenize(const char *line, int *argc_out)
     return argv;
 
 fail:
-    for (size_t i = 0; i < argc; i++) free(argv[i]);
+    for (size_t i = 0; i < argc; i++)
+        free(argv[i]);
     free(argv);
     *argc_out = 0;
     return NULL;
@@ -312,8 +322,10 @@ fail:
 
 void nyx_repl_free_tokens(char **argv, int argc)
 {
-    if (!argv) return;
-    for (int i = 0; i < argc; i++) free(argv[i]);
+    if (!argv)
+        return;
+    for (int i = 0; i < argc; i++)
+        free(argv[i]);
     free(argv);
 }
 
@@ -322,7 +334,8 @@ void nyx_repl_free_tokens(char **argv, int argc)
 nyx_repl_t *nyx_repl_create(const char *name)
 {
     nyx_repl_t *r = calloc(1, sizeof(*r));
-    if (!r) return NULL;
+    if (!r)
+        return NULL;
     r->name = safe_strdup(name ? name : "nyx");
     r->history_path = history_path_for(r->name);
     return r;
@@ -330,7 +343,8 @@ nyx_repl_t *nyx_repl_create(const char *name)
 
 void nyx_repl_free(nyx_repl_t *repl)
 {
-    if (!repl) return;
+    if (!repl)
+        return;
     free(repl->name);
     free(repl->context);
     free(repl->welcome);
@@ -349,28 +363,29 @@ void nyx_repl_free(nyx_repl_t *repl)
 
 void nyx_repl_add_cmd(nyx_repl_t *repl, const nyx_repl_cmd_t *cmd)
 {
-    if (!repl || !cmd || !cmd->name) return;
+    if (!repl || !cmd || !cmd->name)
+        return;
 
     if (repl->cmd_count == repl->cmd_cap) {
         size_t nc = repl->cmd_cap ? repl->cmd_cap * 2 : 16;
         nyx_repl_cmd_t *tmp = realloc(repl->cmds, nc * sizeof(*tmp));
-        if (!tmp) return;
+        if (!tmp)
+            return;
         repl->cmds = tmp;
         repl->cmd_cap = nc;
     }
 
     nyx_repl_cmd_t *dst = &repl->cmds[repl->cmd_count++];
-    dst->name        = safe_strdup(cmd->name);
-    dst->usage       = safe_strdup(cmd->usage);
+    dst->name = safe_strdup(cmd->name);
+    dst->usage = safe_strdup(cmd->usage);
     dst->description = safe_strdup(cmd->description);
-    dst->help        = safe_strdup(cmd->help);
-    dst->handler     = cmd->handler;
-    dst->flags       = cmd->flags;
-    dst->flag_count  = cmd->flag_count;
+    dst->help = safe_strdup(cmd->help);
+    dst->handler = cmd->handler;
+    dst->flags = cmd->flags;
+    dst->flag_count = cmd->flag_count;
 }
 
-void nyx_repl_add_cmds(nyx_repl_t *repl, const nyx_repl_cmd_t *cmds,
-                        size_t count)
+void nyx_repl_add_cmds(nyx_repl_t *repl, const nyx_repl_cmd_t *cmds, size_t count)
 {
     for (size_t i = 0; i < count; i++)
         nyx_repl_add_cmd(repl, &cmds[i]);
@@ -378,12 +393,14 @@ void nyx_repl_add_cmds(nyx_repl_t *repl, const nyx_repl_cmd_t *cmds,
 
 void nyx_repl_set_fallback(nyx_repl_t *repl, nyx_repl_handler_fn fn)
 {
-    if (repl) repl->fallback = fn;
+    if (repl)
+        repl->fallback = fn;
 }
 
 void nyx_repl_set_userdata(nyx_repl_t *repl, void *data)
 {
-    if (repl) repl->userdata = data;
+    if (repl)
+        repl->userdata = data;
 }
 
 void *nyx_repl_get_userdata(const nyx_repl_t *repl)
@@ -393,7 +410,8 @@ void *nyx_repl_get_userdata(const nyx_repl_t *repl)
 
 void nyx_repl_set_context(nyx_repl_t *repl, const char *context)
 {
-    if (!repl) return;
+    if (!repl)
+        return;
     free(repl->context);
     repl->context = safe_strdup(context);
 }
@@ -405,14 +423,16 @@ const char *nyx_repl_get_context(const nyx_repl_t *repl)
 
 void nyx_repl_set_welcome(nyx_repl_t *repl, const char *message)
 {
-    if (!repl) return;
+    if (!repl)
+        return;
     free(repl->welcome);
     repl->welcome = safe_strdup(message);
 }
 
 void nyx_repl_request_exit(nyx_repl_t *repl)
 {
-    if (repl) repl->exit_requested = 1;
+    if (repl)
+        repl->exit_requested = 1;
 }
 
 /* ---- Built-in commands ---- */
@@ -422,8 +442,7 @@ static void print_help(const nyx_repl_t *repl)
     printf("\nAvailable commands:\n\n");
     for (size_t i = 0; i < repl->cmd_count; i++) {
         const nyx_repl_cmd_t *c = &repl->cmds[i];
-        printf("  %-14s %s\n", c->name,
-               c->description ? c->description : "");
+        printf("  %-14s %s\n", c->name, c->description ? c->description : "");
     }
     printf("\n");
     printf("  %-14s %s\n", "history", "Show command history");
@@ -438,7 +457,8 @@ static void print_cmd_help(const nyx_repl_t *repl, const char *cmd_name)
 {
     for (size_t i = 0; i < repl->cmd_count; i++) {
         const nyx_repl_cmd_t *c = &repl->cmds[i];
-        if (strcmp(c->name, cmd_name) != 0) continue;
+        if (strcmp(c->name, cmd_name) != 0)
+            continue;
 
         printf("\n");
         if (c->usage && c->usage[0])
@@ -465,15 +485,15 @@ static void print_cmd_help(const nyx_repl_t *repl, const char *cmd_name)
         return;
     }
 
-    fprintf(stderr, "  Unknown command '%s'. Type 'help' to see all commands.\n",
-            cmd_name);
+    fprintf(stderr, "  Unknown command '%s'. Type 'help' to see all commands.\n", cmd_name);
 }
 
 /* ---- Main loop ---- */
 
 int nyx_repl_run(nyx_repl_t *repl)
 {
-    if (!repl) return -1;
+    if (!repl)
+        return -1;
     repl->exit_requested = 0;
 
     /* Set up linenoise */
@@ -490,24 +510,30 @@ int nyx_repl_run(nyx_repl_t *repl)
     while (!repl->exit_requested) {
         char prompt[128];
         if (repl->context)
-            snprintf(prompt, sizeof(prompt), "%s:%s> ",
-                     repl->name, repl->context);
+            snprintf(prompt, sizeof(prompt), "%s:%s> ", repl->name, repl->context);
         else
             snprintf(prompt, sizeof(prompt), "%s> ", repl->name);
 
         char *raw = linenoise(prompt);
-        if (!raw) { printf("\n"); break; }
+        if (!raw) {
+            printf("\n");
+            break;
+        }
 
         /* Trim whitespace */
         char *line = raw;
-        while (*line && isspace((unsigned char)*line)) line++;
+        while (*line && isspace((unsigned char)*line))
+            line++;
         {
             size_t len = strlen(line);
             while (len > 0 && isspace((unsigned char)line[len - 1]))
                 line[--len] = '\0';
         }
 
-        if (!line[0]) { linenoiseFree(raw); continue; }
+        if (!line[0]) {
+            linenoiseFree(raw);
+            continue;
+        }
 
         if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
             linenoiseFree(raw);
@@ -526,8 +552,10 @@ int nyx_repl_run(nyx_repl_t *repl)
 
         if (strncmp(line, "help ", 5) == 0 && line[5]) {
             const char *arg = line + 5;
-            while (*arg == ' ') arg++;
-            if (*arg) print_cmd_help(repl, arg);
+            while (*arg == ' ')
+                arg++;
+            if (*arg)
+                print_cmd_help(repl, arg);
             linenoiseFree(raw);
             continue;
         }
@@ -572,8 +600,7 @@ int nyx_repl_run(nyx_repl_t *repl)
         }
 
         if (!handled) {
-            fprintf(stderr, "%s: unknown command '%s'. Type 'help'.\n",
-                    repl->name, argv[0]);
+            fprintf(stderr, "%s: unknown command '%s'. Type 'help'.\n", repl->name, argv[0]);
         }
 
         nyx_repl_free_tokens(argv, argc);

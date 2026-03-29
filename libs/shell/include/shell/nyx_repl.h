@@ -44,17 +44,17 @@ typedef int (*nyx_repl_handler_fn)(int argc, char **argv, void *data);
  * Tab-completion type for a flag's value argument.
  */
 typedef enum {
-    NYX_COMPL_NONE  = 0,  /**< No value completion */
-    NYX_COMPL_IFACE,      /**< Complete network interface names */
-    NYX_COMPL_FILE,       /**< Complete filesystem paths */
-    NYX_COMPL_TOOL,       /**< Complete registered tool names */
+    NYX_COMPL_NONE = 0, /**< No value completion */
+    NYX_COMPL_IFACE,    /**< Complete network interface names */
+    NYX_COMPL_FILE,     /**< Complete filesystem paths */
+    NYX_COMPL_TOOL,     /**< Complete registered tool names */
 } nyx_compl_type_t;
 
 /**
  * Flag descriptor for tab-completion metadata.
  */
 typedef struct nyx_repl_flag {
-    const char      *name;       /**< Flag string (e.g. "-c", "--cidr") */
+    const char *name;            /**< Flag string (e.g. "-c", "--cidr") */
     nyx_compl_type_t compl_type; /**< Value completion type */
 } nyx_repl_flag_t;
 
@@ -80,7 +80,7 @@ typedef struct nyx_repl_cmd {
     const char *help;
     nyx_repl_handler_fn handler;
     const nyx_repl_flag_t *flags;
-    size_t                 flag_count;
+    size_t flag_count;
 } nyx_repl_cmd_t;
 
 /* ---- Lifecycle ---- */
@@ -108,8 +108,7 @@ void nyx_repl_add_cmd(nyx_repl_t *repl, const nyx_repl_cmd_t *cmd);
 /**
  * Register an array of commands at once.
  */
-void nyx_repl_add_cmds(nyx_repl_t *repl, const nyx_repl_cmd_t *cmds,
-                        size_t count);
+void nyx_repl_add_cmds(nyx_repl_t *repl, const nyx_repl_cmd_t *cmds, size_t count);
 
 /**
  * Set a fallback handler invoked when no registered command matches.

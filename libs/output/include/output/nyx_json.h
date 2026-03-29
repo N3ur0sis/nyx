@@ -60,7 +60,7 @@ void nyx_json_free(nyx_json_t *node);
 /* ---- Serializer ---- */
 
 char *nyx_json_serialize(const nyx_json_t *node, int indent);
-int   nyx_json_write_file(const nyx_json_t *node, const char *path, int indent);
+int nyx_json_write_file(const nyx_json_t *node, const char *path, int indent);
 
 /* ---- Parser ---- */
 
@@ -69,15 +69,15 @@ nyx_json_t *nyx_json_parse_file(const char *path);
 
 /* ---- Accessors ---- */
 
-nyx_json_type_t  nyx_json_type(const nyx_json_t *node);
-const char      *nyx_json_get_string(const nyx_json_t *node);
-long             nyx_json_get_int(const nyx_json_t *node);
-double           nyx_json_get_real(const nyx_json_t *node);
-int              nyx_json_get_bool(const nyx_json_t *node);
+nyx_json_type_t nyx_json_type(const nyx_json_t *node);
+const char *nyx_json_get_string(const nyx_json_t *node);
+long nyx_json_get_int(const nyx_json_t *node);
+double nyx_json_get_real(const nyx_json_t *node);
+int nyx_json_get_bool(const nyx_json_t *node);
 
-nyx_json_t      *nyx_json_get(const nyx_json_t *obj, const char *key);
-size_t           nyx_json_length(const nyx_json_t *arr_or_obj);
-nyx_json_t      *nyx_json_at(const nyx_json_t *arr, size_t index);
+nyx_json_t *nyx_json_get(const nyx_json_t *obj, const char *key);
+size_t nyx_json_length(const nyx_json_t *arr_or_obj);
+nyx_json_t *nyx_json_at(const nyx_json_t *arr, size_t index);
 
 #ifdef __cplusplus
 }

@@ -16,7 +16,8 @@
 
 void nyx_wf_set_var(nyx_workflow_t *wf, const char *key, const char *value)
 {
-    if (!wf || !key || !value) return;
+    if (!wf || !key || !value)
+        return;
 
     if (!wf->vars)
         wf->vars = nyx_json_object();

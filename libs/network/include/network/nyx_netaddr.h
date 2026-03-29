@@ -18,10 +18,10 @@
  * @name Status Codes
  * @{
  */
-#define NYX_NETADDR_SUCCESS       0
-#define NYX_NETADDR_ERR_PARAM    -1
-#define NYX_NETADDR_ERR_FORMAT   -2
-#define NYX_NETADDR_ERR_RANGE    -3
+#define NYX_NETADDR_SUCCESS    0
+#define NYX_NETADDR_ERR_PARAM  -1
+#define NYX_NETADDR_ERR_FORMAT -2
+#define NYX_NETADDR_ERR_RANGE  -3
 /** @} */
 
 #define NYX_MAX_IP_LEN   16

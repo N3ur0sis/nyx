@@ -29,18 +29,18 @@
  * @name Constants
  * @{
  */
-#define PH_PORTSCAN_MAX_PORTS        65535
-#define PH_PORTSCAN_DEFAULT_TIMEOUT  2000   /**< Per-port timeout in ms */
-#define PH_PORTSCAN_DEFAULT_THREADS  16
+#define PH_PORTSCAN_MAX_PORTS         65535
+#define PH_PORTSCAN_DEFAULT_TIMEOUT   2000 /**< Per-port timeout in ms */
+#define PH_PORTSCAN_DEFAULT_THREADS   16
 #define PH_PORTSCAN_DEFAULT_TOP_PORTS 100
-#define PH_PORTSCAN_MAX_IP_LEN       16     /**< Max IPv4 string length */
+#define PH_PORTSCAN_MAX_IP_LEN        16 /**< Max IPv4 string length */
 /** @} */
 
 /**
  * @name Status Codes
  * @{
  */
-#define PH_PORTSCAN_SUCCESS             0
+#define PH_PORTSCAN_SUCCESS            0
 #define PH_PORTSCAN_ERR_INVALID_TARGET -1
 #define PH_PORTSCAN_ERR_SOCKET         -2
 #define PH_PORTSCAN_ERR_PERMISSION     -3
@@ -55,24 +55,20 @@
  * Scan mode
  */
 typedef enum {
-    PH_PORTSCAN_TCP_CONNECT = 0,  /**< connect() -- no root needed */
-    PH_PORTSCAN_TCP_SYN     = 1   /**< raw SYN -- needs root, fast+stealth */
+    PH_PORTSCAN_TCP_CONNECT = 0, /**< connect() -- no root needed */
+    PH_PORTSCAN_TCP_SYN = 1      /**< raw SYN -- needs root, fast+stealth */
 } ph_portscan_mode_t;
 
 /**
  * Port state as determined by the scan
  */
-typedef enum {
-    PH_PORT_OPEN     = 0,
-    PH_PORT_CLOSED   = 1,
-    PH_PORT_FILTERED = 2
-} ph_port_state_t;
+typedef enum { PH_PORT_OPEN = 0, PH_PORT_CLOSED = 1, PH_PORT_FILTERED = 2 } ph_port_state_t;
 
 /**
  * Result for a single port
  */
 typedef struct {
-    uint16_t        port;
+    uint16_t port;
     ph_port_state_t state;
 } ph_portscan_port_t;
 
@@ -81,11 +77,11 @@ typedef struct {
  */
 typedef struct {
     char target[PH_PORTSCAN_MAX_IP_LEN];
-    ph_portscan_port_t *ports;  /**< Array of per-port results */
-    size_t scanned_count;       /**< Total ports scanned */
-    size_t open_count;          /**< Ports in OPEN state */
+    ph_portscan_port_t *ports;      /**< Array of per-port results */
+    size_t scanned_count;           /**< Total ports scanned */
+    size_t open_count;              /**< Ports in OPEN state */
     ph_portscan_mode_t actual_mode; /**< Effective mode after fallbacks */
-    double elapsed_ms;          /**< Total scan duration */
+    double elapsed_ms;              /**< Total scan duration */
 } ph_portscan_result_t;
 
 /**
@@ -93,9 +89,9 @@ typedef struct {
  */
 typedef struct {
     char target[PH_PORTSCAN_MAX_IP_LEN];
-    uint16_t port_start;        /**< Range start (0 if using top_ports) */
-    uint16_t port_end;          /**< Range end */
-    int top_ports;              /**< If > 0, scan top N common ports instead of range */
+    uint16_t port_start; /**< Range start (0 if using top_ports) */
+    uint16_t port_end;   /**< Range end */
+    int top_ports;       /**< If > 0, scan top N common ports instead of range */
     ph_portscan_mode_t mode;
     int timeout_ms;
     int threads;
@@ -115,8 +111,7 @@ extern "C" {
  * @param result Pointer to receive allocated results
  * @return PH_PORTSCAN_SUCCESS on success, or a negative error code
  */
-int ph_portscan_scan(const ph_portscan_config_t *config,
-                     ph_portscan_result_t **result);
+int ph_portscan_scan(const ph_portscan_config_t *config, ph_portscan_result_t **result);
 
 /**
  * Frees a result structure returned by ph_portscan_scan().
@@ -131,8 +126,7 @@ void ph_portscan_free_result(ph_portscan_result_t *result);
  * @param result  Scan results to display
  * @param open_only If non-zero, only print ports with OPEN state
  */
-void ph_portscan_print_result(const ph_portscan_result_t *result,
-                              int open_only);
+void ph_portscan_print_result(const ph_portscan_result_t *result, int open_only);
 
 #ifdef __cplusplus
 }

@@ -23,7 +23,7 @@ int ph_arpspoof_cmd_invoke(const nyx_json_t *params, nyx_output_ctx_t *out);
 
 /** Interactive REPL commands for arpspoof. */
 extern const nyx_repl_cmd_t ph_arpspoof_repl_cmds[];
-extern const size_t         ph_arpspoof_repl_cmd_count;
+extern const size_t ph_arpspoof_repl_cmd_count;
 
 /** Register arpspoof in the global tool registry. */
 void ph_arpspoof_register(void);

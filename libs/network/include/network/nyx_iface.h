@@ -20,7 +20,7 @@
  * @name Status Codes
  * @{
  */
-#define NYX_IFACE_SUCCESS       0
+#define NYX_IFACE_SUCCESS      0
 #define NYX_IFACE_ERR_GENERIC  -1
 #define NYX_IFACE_ERR_PARAM    -2
 #define NYX_IFACE_ERR_NOTFOUND -3
@@ -43,8 +43,7 @@ int nyx_iface_get_mac(const char *iface, char *buffer, size_t len);
 int nyx_iface_get_ipv4(const char *iface, char *buffer, size_t len);
 int nyx_iface_get_netmask(const char *iface, char *buffer, size_t len);
 int nyx_iface_list(char interfaces[][IFNAMSIZ], size_t max_count, size_t *count);
-int nyx_iface_get_mac_by_ip(const char *iface, const char *ip_addr,
-                             char *mac_buffer, size_t len);
+int nyx_iface_get_mac_by_ip(const char *iface, const char *ip_addr, char *mac_buffer, size_t len);
 unsigned int nyx_iface_get_index(const char *iface);
 int nyx_iface_print_details(void);
 int nyx_iface_get_default_gateway(char *buffer, size_t len);

@@ -12,10 +12,10 @@
  * - Generate realistic random MAC addresses
  * - Apply custom MAC addresses to interfaces
  * - Save and restore original MAC addresses
- * 
+ *
  * On error, this module sets detailed error information in the nyx_error system,
  * which can be retrieved and reported using nyx_error_get() and nyx_error_log().
- * 
+ *
  * This module is part of the Nyx Offensive Security Framework.
  */
 
@@ -34,16 +34,16 @@
  * Return values for API functions
  * @{
  */
-#define PH_SUCCESS             0   /**< Operation completed successfully */
-#define PH_ERR_INVALID_MAC    -1   /**< MAC address format is invalid */
-#define PH_ERR_NO_IFACE       -2   /**< Interface doesn't exist or invalid */
-#define PH_ERR_SOCKET         -3   /**< Socket creation failed */
-#define PH_ERR_IOCTL          -4   /**< IOCTL operation failed */
-#define PH_ERR_FILE_IO        -5   /**< File I/O operation failed */
-#define PH_ERR_PERMISSION     -6   /**< Insufficient permissions */
-#define PH_ERR_NOT_FOUND      -7   /**< Requested resource not found */
-#define PH_ERR_ALREADY_SAVED  -8   /**< MAC address already saved */
-#define PH_ERR_BUSY           -9   /**< Device or resource busy */
+#define PH_SUCCESS           0  /**< Operation completed successfully */
+#define PH_ERR_INVALID_MAC   -1 /**< MAC address format is invalid */
+#define PH_ERR_NO_IFACE      -2 /**< Interface doesn't exist or invalid */
+#define PH_ERR_SOCKET        -3 /**< Socket creation failed */
+#define PH_ERR_IOCTL         -4 /**< IOCTL operation failed */
+#define PH_ERR_FILE_IO       -5 /**< File I/O operation failed */
+#define PH_ERR_PERMISSION    -6 /**< Insufficient permissions */
+#define PH_ERR_NOT_FOUND     -7 /**< Requested resource not found */
+#define PH_ERR_ALREADY_SAVED -8 /**< MAC address already saved */
+#define PH_ERR_BUSY          -9 /**< Device or resource busy */
 /** @} */
 
 #ifdef __cplusplus
@@ -53,7 +53,7 @@ extern "C" {
 /**
  * Lists all available network interfaces with their MAC addresses
  *
- * Outputs a list of network interfaces detected on the system along with 
+ * Outputs a list of network interfaces detected on the system along with
  * their operational status (UP/DOWN) and current MAC address.
  * This is a convenience function for CLI usage that prints directly to stdout.
  *
@@ -151,7 +151,7 @@ int ph_macspoof_show_mac(const char *iface);
 /**
  * Applies a random MAC address to an interface
  *
- * @param iface Interface name (e.g., "eth0") 
+ * @param iface Interface name (e.g., "eth0")
  * @return PH_SUCCESS on success, or error code on failure
  */
 int ph_macspoof_random_mac(const char *iface);

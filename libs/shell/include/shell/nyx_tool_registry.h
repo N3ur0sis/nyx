@@ -50,8 +50,7 @@ extern "C" {
  * @param out     Pre-initialized output context
  * @return 0 on success, non-zero on tool-level error
  */
-typedef int (*nyx_tool_invoke_fn)(const nyx_json_t *params,
-                                  nyx_output_ctx_t *out);
+typedef int (*nyx_tool_invoke_fn)(const nyx_json_t *params, nyx_output_ctx_t *out);
 
 struct nyx_repl_cmd;
 
@@ -65,10 +64,10 @@ typedef struct {
     const char *description; /**< One-line description for help/listings */
     nyx_tool_invoke_fn invoke;
 
-    const struct nyx_repl_cmd *cmds;  /**< REPL command table (shared, not owned) */
-    size_t cmd_count;                 /**< Number of entries in cmds */
+    const struct nyx_repl_cmd *cmds; /**< REPL command table (shared, not owned) */
+    size_t cmd_count;                /**< Number of entries in cmds */
 
-    int required_priv;       /**< nyx_priv_t bitmask needed to run this tool */
+    int required_priv; /**< nyx_priv_t bitmask needed to run this tool */
 } nyx_tool_entry_t;
 
 /* ---- Registry management ---- */

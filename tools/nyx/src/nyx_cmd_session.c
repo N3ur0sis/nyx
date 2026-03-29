@@ -23,11 +23,13 @@
 static char *get_sessions_dir(void)
 {
     const char *home = getenv("HOME");
-    if (!home) home = "/tmp";
+    if (!home)
+        home = "/tmp";
 
     size_t len = strlen(home) + 1 + strlen(SESSION_DIR_BASE) + 1;
     char *path = malloc(len);
-    if (!path) return NULL;
+    if (!path)
+        return NULL;
     snprintf(path, len, "%s/%s", home, SESSION_DIR_BASE);
     return path;
 }
@@ -37,7 +39,8 @@ static char *get_sessions_dir(void)
 static int cmd_list(void)
 {
     char *base = get_sessions_dir();
-    if (!base) return 1;
+    if (!base)
+        return 1;
 
     DIR *d = opendir(base);
     if (!d) {
@@ -46,25 +49,28 @@ static int cmd_list(void)
         return 0;
     }
 
-    printf(COLOR_CYAN "%-14s  %-22s  %-10s  %s" COLOR_RESET "\n",
-           "SESSION", "DATE", "STATUS", "TOOLS");
-    printf("%-14s  %-22s  %-10s  %s\n",
-           "──────────────", "──────────────────────", "──────────", "─────────────");
+    printf(COLOR_CYAN "%-14s  %-22s  %-10s  %s" COLOR_RESET "\n", "SESSION", "DATE", "STATUS",
+           "TOOLS");
+    printf("%-14s  %-22s  %-10s  %s\n", "──────────────", "──────────────────────", "──────────",
+           "─────────────");
 
     struct dirent *ent;
     int count = 0;
     while ((ent = readdir(d)) != NULL) {
-        if (ent->d_name[0] == '.') continue;
+        if (ent->d_name[0] == '.')
+            continue;
 
         char sess_path[512];
         snprintf(sess_path, sizeof(sess_path), "%s/%s", base, ent->d_name);
 
         struct stat st;
-        if (stat(sess_path, &st) != 0 || !S_ISDIR(st.st_mode)) continue;
+        if (stat(sess_path, &st) != 0 || !S_ISDIR(st.st_mode))
+            continue;
 
         /* Scan session directory for *.nyx.json files */
         DIR *sd = opendir(sess_path);
-        if (!sd) continue;
+        if (!sd)
+            continue;
 
         char tools_buf[256] = "";
         size_t tlen = 0;
@@ -75,13 +81,16 @@ static int cmd_list(void)
         struct dirent *fent;
         while ((fent = readdir(sd)) != NULL) {
             size_t nlen = strlen(fent->d_name);
-            if (nlen < 10) continue;
-            if (strcmp(fent->d_name + nlen - 9, ".nyx.json") != 0) continue;
+            if (nlen < 10)
+                continue;
+            if (strcmp(fent->d_name + nlen - 9, ".nyx.json") != 0)
+                continue;
 
             /* Extract tool name from filename (strip .nyx.json) */
             char tool_name[64];
             size_t tnlen = nlen - 9;
-            if (tnlen >= sizeof(tool_name)) tnlen = sizeof(tool_name) - 1;
+            if (tnlen >= sizeof(tool_name))
+                tnlen = sizeof(tool_name) - 1;
             memcpy(tool_name, fent->d_name, tnlen);
             tool_name[tnlen] = '\0';
 
@@ -106,8 +115,7 @@ static int cmd_list(void)
                     if (nyx_meta) {
                         const nyx_json_t *ts = nyx_json_get(nyx_meta, "timestamp");
                         if (ts && nyx_json_type(ts) == NYX_JSON_STRING) {
-                            snprintf(date_str, sizeof(date_str), "%s",
-                                     nyx_json_get_string(ts));
+                            snprintf(date_str, sizeof(date_str), "%s", nyx_json_get_string(ts));
                         }
                     }
                     const nyx_json_t *st_node = nyx_json_get(root, "status");
@@ -124,11 +132,16 @@ static int cmd_list(void)
         /* Color the status */
         const char *sc = "";
         const char *sr = "";
-        if (strcmp(status_str, "success") == 0) { sc = COLOR_GREEN; sr = COLOR_RESET; }
-        else if (strcmp(status_str, "error") == 0) { sc = COLOR_RED; sr = COLOR_RESET; }
+        if (strcmp(status_str, "success") == 0) {
+            sc = COLOR_GREEN;
+            sr = COLOR_RESET;
+        } else if (strcmp(status_str, "error") == 0) {
+            sc = COLOR_RED;
+            sr = COLOR_RESET;
+        }
 
-        printf("%-14s  %-22s  %s%-10s%s  %s\n",
-               ent->d_name, date_str, sc, status_str, sr, tools_buf);
+        printf("%-14s  %-22s  %s%-10s%s  %s\n", ent->d_name, date_str, sc, status_str, sr,
+               tools_buf);
         count++;
     }
     closedir(d);
@@ -147,7 +160,8 @@ static int cmd_list(void)
 static int cmd_show(const char *session_id, int json_mode)
 {
     char *base = get_sessions_dir();
-    if (!base) return 1;
+    if (!base)
+        return 1;
 
     char sess_path[512];
     snprintf(sess_path, sizeof(sess_path), "%s/%s", base, session_id);
@@ -166,12 +180,15 @@ static int cmd_show(const char *session_id, int json_mode)
     struct dirent *ent;
     while ((ent = readdir(d)) != NULL) {
         size_t nlen = strlen(ent->d_name);
-        if (nlen < 10) continue;
-        if (strcmp(ent->d_name + nlen - 9, ".nyx.json") != 0) continue;
+        if (nlen < 10)
+            continue;
+        if (strcmp(ent->d_name + nlen - 9, ".nyx.json") != 0)
+            continue;
 
         char tool_name[64];
         size_t tnlen = nlen - 9;
-        if (tnlen >= sizeof(tool_name)) tnlen = sizeof(tool_name) - 1;
+        if (tnlen >= sizeof(tool_name))
+            tnlen = sizeof(tool_name) - 1;
         memcpy(tool_name, ent->d_name, tnlen);
         tool_name[tnlen] = '\0';
 
@@ -179,7 +196,8 @@ static int cmd_show(const char *session_id, int json_mode)
         snprintf(fpath, sizeof(fpath), "%s/%s", sess_path, ent->d_name);
 
         nyx_json_t *root = nyx_json_parse_file(fpath);
-        if (!root) continue;
+        if (!root)
+            continue;
 
         if (json_mode) {
             /* Clone into merged object */
@@ -247,7 +265,8 @@ static int cmd_show(const char *session_id, int json_mode)
 static int remove_dir_recursive(const char *path)
 {
     DIR *d = opendir(path);
-    if (!d) return -1;
+    if (!d)
+        return -1;
 
     struct dirent *ent;
     while ((ent = readdir(d)) != NULL) {
@@ -281,7 +300,8 @@ static int cmd_clean(int argc, char **argv)
     }
 
     char *base = get_sessions_dir();
-    if (!base) return 1;
+    if (!base)
+        return 1;
 
     DIR *d = opendir(base);
     if (!d) {
@@ -295,17 +315,20 @@ static int cmd_clean(int argc, char **argv)
 
     struct dirent *ent;
     while ((ent = readdir(d)) != NULL) {
-        if (ent->d_name[0] == '.') continue;
+        if (ent->d_name[0] == '.')
+            continue;
 
         char sess_path[512];
         snprintf(sess_path, sizeof(sess_path), "%s/%s", base, ent->d_name);
 
         struct stat st;
-        if (stat(sess_path, &st) != 0 || !S_ISDIR(st.st_mode)) continue;
+        if (stat(sess_path, &st) != 0 || !S_ISDIR(st.st_mode))
+            continue;
 
         if (older_than_days >= 0) {
             double age_days = difftime(now, st.st_mtime) / 86400.0;
-            if (age_days < (double)older_than_days) continue;
+            if (age_days < (double)older_than_days)
+                continue;
         }
 
         if (!force) {
@@ -313,16 +336,17 @@ static int cmd_clean(int argc, char **argv)
             fflush(stdout);
             int c = getchar();
             /* Consume rest of line */
-            while (c != '\n' && c != EOF) c = getchar();
-            if (c != 'y' && c != 'Y') continue;
+            while (c != '\n' && c != EOF)
+                c = getchar();
+            if (c != 'y' && c != 'Y')
+                continue;
         }
 
         if (remove_dir_recursive(sess_path) == 0) {
             printf("  Removed %s\n", ent->d_name);
             removed++;
         } else {
-            fprintf(stderr, "  Failed to remove %s: %s\n",
-                    ent->d_name, strerror(errno));
+            fprintf(stderr, "  Failed to remove %s: %s\n", ent->d_name, strerror(errno));
         }
     }
     closedir(d);
@@ -337,13 +361,12 @@ static int cmd_clean(int argc, char **argv)
 int nyx_cmd_session(int argc, char **argv)
 {
     if (argc < 2) {
-        fprintf(stderr,
-            "Usage: nyx session <subcommand>\n"
-            "\n"
-            "Subcommands:\n"
-            "  list                   List all sessions\n"
-            "  show <id> [-J]         Show session details\n"
-            "  clean [--older-than N] Remove sessions\n");
+        fprintf(stderr, "Usage: nyx session <subcommand>\n"
+                        "\n"
+                        "Subcommands:\n"
+                        "  list                   List all sessions\n"
+                        "  show <id> [-J]         Show session details\n"
+                        "  clean [--older-than N] Remove sessions\n");
         return 1;
     }
 
@@ -371,13 +394,12 @@ int nyx_cmd_session(int argc, char **argv)
     }
 
     if (strcmp(sub, "--help") == 0 || strcmp(sub, "-h") == 0) {
-        printf(
-            "Usage: nyx session <subcommand>\n"
-            "\n"
-            "Subcommands:\n"
-            "  list                        List all sessions\n"
-            "  show <id> [-J]              Show session details (-J for JSON)\n"
-            "  clean [--older-than DAYS]   Remove sessions (--force to skip prompt)\n");
+        printf("Usage: nyx session <subcommand>\n"
+               "\n"
+               "Subcommands:\n"
+               "  list                        List all sessions\n"
+               "  show <id> [-J]              Show session details (-J for JSON)\n"
+               "  clean [--older-than DAYS]   Remove sessions (--force to skip prompt)\n");
         return 0;
     }
 

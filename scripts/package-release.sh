@@ -35,14 +35,14 @@ mkdir -p "$STAGE_DIR"
 # Build
 echo "--- Configuring ---"
 cmake -B build -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX=/usr/local 2>&1 | tail -3
+      -DCMAKE_INSTALL_PREFIX=/usr/local
 
 echo "--- Building ---"
-cmake --build build -- -j"$(nproc)" 2>&1 | tail -3
+cmake --build build -- -j"$(nproc)"
 
 # Install into staging prefix
 echo "--- Staging install ---"
-DESTDIR="$STAGE_DIR" cmake --install build 2>&1 | tail -5
+DESTDIR="$STAGE_DIR" cmake --install build
 
 # Add extra files to the tarball root
 cp LICENSE "$STAGE_DIR/" 2>/dev/null || true
